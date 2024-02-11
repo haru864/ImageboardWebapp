@@ -1,0 +1,14 @@
+＃ マイグレーションコマンド
+php console.php code-gen migration --name CreatePost
+php console.php migrate --init
+
+# postテーブル
+post_id     INT         PK
+reply_to_id INT         NULLABLE (スレッド作成時はNULL、それ以外は必須)
+subject     VARCHAR(50) NULLABLE (スレッド作成時は必須、それ以外はNULL)
+content     TEXT        NOT NULL
+created_at  DATETIME    NOT NULL
+updated_at  DATETIME    NOT NULL
+
+
+

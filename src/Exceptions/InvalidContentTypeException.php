@@ -5,7 +5,7 @@ namespace Exceptions;
 use Exceptions\Interface\UserVisibleException;
 use Exceptions\Traits\GenericUserVisibleException;
 
-class FileSizeLimitExceededException extends UserVisibleException
+class InvalidContentTypeException extends UserVisibleException
 {
     use GenericUserVisibleException;
 

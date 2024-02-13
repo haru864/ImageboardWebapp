@@ -1,6 +1,6 @@
 <?php
 
-namespace Render\interface;
+namespace Render\Interface;
 
 interface HTTPRenderer
 {

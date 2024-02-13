@@ -1,6 +1,6 @@
 <?php
 
-namespace Exceptions\interface;
+namespace Exceptions\Interface;
 
 abstract class UserVisibleException extends \Exception
 {

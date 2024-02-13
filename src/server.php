@@ -2,14 +2,13 @@
 
 use Logging\Logger;
 use Logging\LogLevel;
-use Request\RequestURI;
+use Request\Request;
 use Exceptions\interface\UserVisibleException;
 
 spl_autoload_extensions(".php");
-// autoloadはこのファイルを実行するプロセスの作業ディレクトリを基準にする
 spl_autoload_register(function ($class) {
     $class = str_replace("\\", "/", $class);
-    $file = $class . '.php';
+    $file = __DIR__ . "/" . $class . '.php';
     // file_put_contents("../test/debug.txt", $file . PHP_EOL, FILE_APPEND);
     if (file_exists($file)) {
         require_once $file;
@@ -26,17 +25,15 @@ try {
     $logger = Logger::getInstance();
     $logger->logRequest();
 
-    $requestURI = new RequestURI();
-    $uriTopDir = $requestURI->getTopDirectory();
+    $request = new Request();
 
     $routes = include('Routing/routes.php');
-
-    if (!isset($routes[$uriTopDir])) {
+    if (!isset($routes[$request->getURI()])) {
         http_response_code(404);
         echo "404 Not Found: The requested route was not found on this server.";
     }
 
-    $renderer = $routes[$uriTopDir]($requestURI);
+    $renderer = $routes[$request->getURI()]($request);
 
     foreach ($renderer->getFields() as $name => $value) {
         $sanitized_value = sanitize_header_value($value);

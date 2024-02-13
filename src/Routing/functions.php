@@ -6,13 +6,14 @@ use Render\interface\HTTPRenderer;
 use Render\HTMLRenderer;
 use Render\JSONRenderer;
 use Settings\Settings;
-use Request\RequestURI;
+use Request\Request;
 
-$displayUploader = function (RequestURI $requestURI): HTTPRenderer {
-    return new HTMLRenderer('uploader');
+$sendHomePage = function (Request $request): HTTPRenderer {
+    
+    return new HTMLRenderer('index',[]);
 };
 
-$registImage = function (RequestURI $requestURI): HTTPRenderer {
+$sendThreadPage = function (Request $request): HTTPRenderer {
     ValidationHelper::image();
     ValidationHelper::client($_SERVER['REMOTE_ADDR']);
     $tmpFilePath = $_FILES['fileUpload']['tmp_name'];
@@ -28,25 +29,4 @@ $registImage = function (RequestURI $requestURI): HTTPRenderer {
     $client_ip_address = $_SERVER['REMOTE_ADDR'];
     DatabaseHelper::insertImage($hash, $imageData, $mediaType, $uploadDate, $view_url, $delete_url, $client_ip_address);
     return new JSONRenderer(['view_url' => $view_url, 'delete_url' => $delete_url]);
-};
-
-$viewImage = function (RequestURI $requestURI): HTTPRenderer {
-    $hash = $requestURI->getSubDirectory();
-    DatabaseHelper::incrementViewCount($hash);
-    DatabaseHelper::updateAccessedDate($hash, date('Y-m-d H:i:s'));
-    $imageData = DatabaseHelper::selectImage($hash);
-    $encoded_image = base64_encode($imageData);
-    $mediaType = DatabaseHelper::selectMediaType($hash);
-    $view_count = DatabaseHelper::selectViewCount($hash);
-    return new HTMLRenderer('viewer', ['encoded_image' => $encoded_image, 'media_type' => $mediaType, 'view_count' => $view_count]);
-};
-
-$deleteImage = function (RequestURI $requestURI): HTTPRenderer {
-    $hash = $requestURI->getSubDirectory();
-    $imageData = DatabaseHelper::selectImage($hash);
-    if (is_null($imageData)) {
-        return new HTMLRenderer('deleted', ['delete_message' => '削除済みの画像です。']);
-    }
-    DatabaseHelper::deleteRow($hash);
-    return new HTMLRenderer('deleted', ['delete_message' => '画像の削除に成功しました。']);
 };

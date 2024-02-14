@@ -9,7 +9,7 @@ use Settings\Settings;
 use Request\Request;
 
 $sendHomePage = function (Request $request): HTTPRenderer {
-    
+    // TODO 作成済みのスレッドを表示できるようにする
     return new HTMLRenderer('index',[]);
 };
 

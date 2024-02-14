@@ -60,38 +60,65 @@ $base_url = Settings::env("BASE_URL");
         <h2>スレッドを作成する</h2>
         <form id="createThread">
             <div class="form-row">
-                <label for="subject">タイトル(50文字まで):</label>
-                <input type="text" name="subject" size="50">
+                <label for="subject">主題(50文字まで):</label>
+                <input type="text" id="subject" name="subject" size="50">
             </div>
             <div class="form-row">
                 <label for="content">本文:</label>
-                <textarea name="content" rows="5" cols="80"></textarea>
+                <textarea id="content" name="content" rows="5" cols="80"></textarea>
             </div>
             <div class="form-row">
                 <label for="image">画像:</label>
-                <input type="file" name="image">
+                <input type="file" id="image" name="image">
             </div>
             <button type="button" id="submitBtn">作成</button>
         </form>
-
     </div>
     <script>
+        function validateSubject() {
+            const MAX_SUBJECT_LENGTH = 50;
+            let subject = document.getElementById('subject').value;
+            if (subject.length > MAX_SUBJECT_LENGTH) {
+                throw new Exception(`主題は${MAX_SUBJECT_LENGTH}文字以内にしてください。`);
+            }
+            return;
+        }
+
+        function validateContent() {
+            const MAX_MYSQL_TEXT_BYTES = 65535;
+            let content = document.getElementById('content').value;
+            let byteSize = new Blob([content]).size;
+            if (byteSize > MAX_SUBJECT_LENGTH) {
+                throw new Exception(`本文のサイズが大きすぎます。${MAX_MYSQL_TEXT_BYTES}バイト以内にしてください。`);
+            }
+            return;
+        }
+
         function validateFile() {
-            const validFiles = ['jpg', 'jpeg', 'png', 'gif'];
-            const fileInput = document.getElementById('fileUpload');
-            const file = fileInput.files[0];
-            const fileName = file.name;
+            const VALID_FILES = ['jpg', 'jpeg', 'png', 'gif'];
+            let fileInput = document.getElementById('image');
+            let file = fileInput.files[0];
+            let fileName = file.name;
             let extension = fileName.split('.').pop().toLowerCase();
-            if (!validFiles.includes(extension)) {
-                throw new Error('Invalid file\njpg,jpeg,png,gif are allowed');
+            if (!VALID_FILES.includes(extension)) {
+                throw new Error(`${VALID_FILES.join(',')}のみアップロードできます。`);
             }
         }
-        async function uploadFile() {
+
+        async function createThread() {
             try {
+                validateSubject();
+                validateContent();
                 validateFile();
+                let action = 'create';
+                let subject = document.getElementById('subject').value;
+                let content = document.getElementById('content').value;
+                let image = document.getElementById('image');
+
+                
                 let formElement = document.querySelector("form");
                 let formData = new FormData(formElement);
-                const response = await fetch('<?= $base_url ?>/register', {
+                let response = await fetch('<?= $base_url ?>/register', {
                     method: "POST",
                     body: formData
                 });

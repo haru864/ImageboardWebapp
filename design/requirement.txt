@@ -13,28 +13,3 @@ thumbnail_path  VARCHAR(255)    NULLABLE
 created_at      DATETIME        NOT NULL
 updated_at      DATETIME        NOT NULL
 
-# URL
-スレッド一覧ページの取得                [GET]https://<domain-name>/ImageboardWebapp/
-投稿一覧ページの取得(作成,リプライ込み)   [POST]https://<domain-name>/ImageboardWebapp/thread
-
-content-type: multipart/form-data
-
-＞既存スレッドを表示するだけ
-action: display
-post_id
-
-＞スレッドを作成して表示
-action: create
-subject
-content
-image
-
-＞リプライを投稿してリフレッシュ
-action: reply
-reply_to_id
-content
-image
-
-
-
-

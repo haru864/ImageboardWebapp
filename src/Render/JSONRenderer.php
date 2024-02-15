@@ -6,11 +6,18 @@ use Render\Interface\HTTPRenderer;
 
 class JSONRenderer implements HTTPRenderer
 {
+    private int $statusCode;
     private array $data;
 
-    public function __construct(array $data)
+    public function __construct(int $statusCode, array $data)
     {
+        $this->statusCode = $statusCode;
         $this->data = $data;
+    }
+
+    public function getStatusCode(): int
+    {
+        return $this->statusCode;
     }
 
     public function getFields(): array

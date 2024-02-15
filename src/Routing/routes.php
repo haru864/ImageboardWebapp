@@ -3,6 +3,6 @@
 require_once 'functions.php';
 
 return [
-    '/ImageboardWebapp' => $sendHomePage,
+    '/ImageboardWebapp/threads' => $manageThreads
     // '/ImageboardWebapp/thread' => $sendThreadPage
 ];

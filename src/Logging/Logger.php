@@ -48,11 +48,13 @@ class Logger
     {
         $requestInfo = [
             'method' => $_SERVER['REQUEST_METHOD'] ?? 'N/A',
+            'content_type' => $_SERVER['CONTENT_TYPE'] ?? 'N/A',
             'uri' => $_SERVER['REQUEST_URI'] ?? 'N/A',
             'query' => $_SERVER['QUERY_STRING'] ?? '',
             'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'N/A',
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? 'N/A',
-            'message_body' => $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : 'N/A',
+            'post_data' => $_SERVER['REQUEST_METHOD'] === 'POST' ? $_POST : 'N/A',
+            'files_data' => $_FILES
         ];
         $this->log(LogLevel::INFO, 'Request received', ['request' => $requestInfo]);
     }

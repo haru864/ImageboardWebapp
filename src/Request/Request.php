@@ -9,7 +9,7 @@ class Request
 {
     private string $method;
     private string $uri;
-    private array $pathArray;
+    private array $pathArray = [];
     private array $queryStringArray = [];
     private array $textParamArray = [];
     private array $fileParamArray = [];
@@ -45,23 +45,23 @@ class Request
         }
     }
 
+    public function getMethod(): string
+    {
+        return $this->method;
+    }
+
     public function getURI(): string
     {
         return $this->uri;
     }
 
-    public function getServiceName(): string
+    public function getTextParam(string $paramName): string
     {
-        return $this->pathArray[0];
+        return $this->textParamArray[$paramName];
     }
 
-    public function getOperation(): string
+    public function getFileParamArray(): array
     {
-        return $this->pathArray[1];
-    }
-
-    public function getPostId(): string
-    {
-        return $this->pathArray[2];
+        return $this->fileParamArray;
     }
 }

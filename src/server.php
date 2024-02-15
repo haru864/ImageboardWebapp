@@ -44,9 +44,11 @@ try {
             print("Failed setting header - original: '$value', sanitized: '$sanitized_value'");
             exit;
         }
-        header("Access-Control-Allow-Origin: *");
-        print($renderer->getContent());
     }
+
+    http_response_code($renderer->getStatusCode());
+    header("Access-Control-Allow-Origin: *");
+    print($renderer->getContent());
 } catch (UserVisibleException $e) {
     http_response_code(400);
     print($e->displayErrorMessage());

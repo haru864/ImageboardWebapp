@@ -25,15 +25,20 @@ try {
     $logger = Logger::getInstance();
     $logger->logRequest();
 
+    $routes = include('Routing/routes.php');
+    $renderer = null;
     $request = new Request();
 
-    $routes = include('Routing/routes.php');
-    if (!isset($routes[$request->getURI()])) {
+    foreach ($routes as $uriPattern => $function) {
+        if (preg_match($uriPattern, $request->getURI())) {
+            $renderer = $function($request);
+        }
+    }
+
+    if (is_null($renderer)) {
         http_response_code(404);
         echo "404 Not Found: The requested route was not found on this server.";
     }
-
-    $renderer = $routes[$request->getURI()]($request);
 
     foreach ($renderer->getFields() as $name => $value) {
         $sanitized_value = sanitize_header_value($value);

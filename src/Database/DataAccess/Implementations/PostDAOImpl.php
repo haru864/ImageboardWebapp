@@ -90,13 +90,16 @@ class PostDAOImpl implements PostDAO
         return $postRecords;
     }
 
-    public function getReplies(Post $postData, int $offset, int $limit): array
+    public function getReplies(Post $postData, int $offset = null, ?int $limit = null): array
     {
         $mysqli = DatabaseManager::getMysqliConnection();
-        $query = <<<SQL
-            SELECT * FROM post WHERE reply_to_id = ? LIMIT ? OFFSET ?;
-        SQL;
-        $postRecords = $mysqli->prepareAndFetchAll($query, 'iii', [$postData->getPostId(), $offset, $limit]);
+        if (is_null($offset) || is_null($limit)) {
+            $query = "SELECT * FROM post WHERE reply_to_id = ?";
+            $postRecords = $mysqli->prepareAndFetchAll($query, 'i', [$postData->getPostId()]);
+        } else {
+            $query = "SELECT * FROM post WHERE reply_to_id = ? LIMIT ? OFFSET ?";
+            $postRecords = $mysqli->prepareAndFetchAll($query, 'iii', [$postData->getPostId(), $offset, $limit]);
+        }
         return $postRecords;
     }
 

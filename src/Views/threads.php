@@ -114,11 +114,9 @@ $base_url = Settings::env("BASE_URL");
                 let subject = document.getElementById('subject').value;
                 let content = document.getElementById('content').value;
                 let image = document.getElementById('image');
-
-                
                 let formElement = document.querySelector("form");
                 let formData = new FormData(formElement);
-                let response = await fetch('<?= $base_url ?>/register', {
+                let response = await fetch('<?= $base_url ?>/threads', {
                     method: "POST",
                     body: formData
                 });

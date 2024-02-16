@@ -43,7 +43,7 @@ function displayThreads(Request $request): HTMLRenderer
 function createThread(Request $request): RedirectRenderer
 {
     $currentDateTime = date('Y-m-d H:i:s');
-    $post = new Post(
+    $newThreadPost = new Post(
         postId: null,
         replyToId: null,
         subject: $request->getTextParam('subject'),
@@ -54,27 +54,47 @@ function createThread(Request $request): RedirectRenderer
         thumbnailPath: 'DummyThumnailPath'
     );
     $postDAO = new PostDAOImpl();
-    $post_id = $postDAO->create($post);
-    $redirectUrl = '/' . $post_id . '/replies';
+    $postId = $postDAO->create($newThreadPost);
+    $redirectUrl = '/' . $postId . '/replies';
     return new RedirectRenderer($redirectUrl);
 };
 
 function displayReplies(Request $request): HTMLRenderer
 {
-    $PATTERN_CATCHING_POST_ID = '/^\/ImageboardWebapp\/threads\/(\d+)\/replies$/';
-    if (preg_match($PATTERN_CATCHING_POST_ID, $request->getURI(), $matches)) {
-        $postIdString = $matches[1];
-    } else {
-        throw new InvalidRequestURIException('URI for replies must contain post_id.');
-    }
     $postDAO = new PostDAOImpl();
-    $threadPost = $postDAO->getById((int)$postIdString);
+    $postId = getPostIdFromURI($request->getURI());
+    $threadPost = $postDAO->getById($postId);
     $replies = $postDAO->getReplies($threadPost);
     return new HTMLRenderer(200, 'replies', ['thread' => $threadPost, 'replies' => $replies]);
 };
 
-// TODO
+// TODO 画像を登録できるようにする
 function createReply(Request $request): JSONRenderer
 {
+    $postId = getPostIdFromURI($request->getURI());
+    $currentDateTime = date('Y-m-d H:i:s');
+    $replyPost = new Post(
+        postId: null,
+        replyToId: $postId,
+        subject: null,
+        content: $request->getTextParam('content'),
+        createdAt: $currentDateTime,
+        updatedAt: $currentDateTime,
+        imagePath: 'DummyImagePath',
+        thumbnailPath: 'DummyThumnailPath'
+    );
+    $postDAO = new PostDAOImpl();
+    $postId = $postDAO->create($replyPost);
     return new JSONRenderer(200, []);
+}
+
+function getPostIdFromURI(string $uri): int
+{
+    $PATTERN_CATCHING_POST_ID = '/^\/ImageboardWebapp\/threads\/(\d+)\/replies$/';
+    if (preg_match($PATTERN_CATCHING_POST_ID, $uri, $matches)) {
+        $postIdString = $matches[1];
+    } else {
+        throw new InvalidRequestURIException('URI for replies must contain post_id.');
+    }
+    return (int)$postIdString;
 }

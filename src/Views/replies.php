@@ -54,17 +54,21 @@ $base_url = Settings::env("BASE_URL");
             <?php endforeach; ?>
         </ul>
     </div>
-    
+    <div>
+        <h3>リプライする</h3>
+        <form id="createThread">
+            <div class="form-row">
+                <label for="content">コメント:</label>
+                <textarea id="content" name="content" rows="5" cols="80"></textarea>
+            </div>
+            <div class="form-row">
+                <label for="image">画像:</label>
+                <input type="file" id="image" name="image">
+            </div>
+            <button type="button" id="submitBtn">リプライ</button>
+        </form>
+    </div>
     <script>
-        function validateSubject() {
-            const MAX_SUBJECT_LENGTH = 50;
-            let subject = document.getElementById('subject').value;
-            if (subject.length > MAX_SUBJECT_LENGTH) {
-                throw new Exception(`主題は${MAX_SUBJECT_LENGTH}文字以内にしてください。`);
-            }
-            return;
-        }
-
         function validateContent() {
             const MAX_MYSQL_TEXT_BYTES = 65535;
             let content = document.getElementById('content').value;
@@ -88,18 +92,15 @@ $base_url = Settings::env("BASE_URL");
 
         async function createThread() {
             try {
-                validateSubject();
                 validateContent();
                 validateFile();
                 let action = 'create';
                 let subject = document.getElementById('subject').value;
                 let content = document.getElementById('content').value;
                 let image = document.getElementById('image');
-
-
                 let formElement = document.querySelector("form");
                 let formData = new FormData(formElement);
-                let response = await fetch('<?= $base_url ?>/register', {
+                let response = await fetch('<?= $base_url ?>/threads/<?= $thread->getPostId() ?>/replies', {
                     method: "POST",
                     body: formData
                 });

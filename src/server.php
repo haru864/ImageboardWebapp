@@ -22,6 +22,8 @@ function sanitize_header_value($value)
 }
 
 try {
+    date_default_timezone_set('Asia/Tokyo');
+
     $logger = Logger::getInstance();
     $logger->logRequest();
 

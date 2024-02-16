@@ -6,17 +6,14 @@ use Database\DataAccess\Interfaces\PostDAO;
 use Database\DatabaseManager;
 use Models\Post;
 use Exceptions\InvalidDataException;
+use Exceptions\QueryFailedException;
 
 class PostDAOImpl implements PostDAO
 {
-    public function create(Post $postData): bool
+    public function create(Post $postData): int
     {
-        if (
-            $postData->getPostId() !== null
-            || $postData->getContent() !== null
-            || $postData->getContent() !== null
-        ) {
-            throw new InvalidDataException('Cannot create a post with specified parameter.');
+        if ($postData->getPostId() !== null) {
+            throw new InvalidDataException('Cannot create a post with id.');
         }
         if ($postData->getContent() === null) {
             throw new InvalidDataException('Cannot create a post with null.');
@@ -49,15 +46,15 @@ class PostDAOImpl implements PostDAO
         return $mysqli->prepareAndExecute("DELETE FROM post WHERE id = ?", 'i', [$id]);
     }
 
-    public function createOrUpdate(Post $postData): bool
+    public function createOrUpdate(Post $postData): int
     {
         $mysqli = DatabaseManager::getMysqliConnection();
         $query = <<<SQL
             INSERT INTO post (
-                post_id, reply_to_id, subject, content, created_at, updated_at, image_path, thumbnail_path
+                reply_to_id, subject, content, created_at, updated_at, image_path, thumbnail_path
             )
             VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?
             )
             ON DUPLICATE KEY UPDATE
                 updated_at = ?
@@ -65,9 +62,8 @@ class PostDAOImpl implements PostDAO
         SQL;
         $result = $mysqli->prepareAndExecute(
             $query,
-            'iisssssss',
+            'isssssss',
             [
-                $postData->getPostId(),
                 $postData->getReplyToId(),
                 $postData->getSubject(),
                 $postData->getContent(),
@@ -79,9 +75,9 @@ class PostDAOImpl implements PostDAO
             ],
         );
         if (!$result) {
-            return false;
+            throw new QueryFailedException('UPSERT post failed.');
         }
-        return true;
+        return $mysqli->insert_id;
     }
 
     public function getAllThreads(int $offset, int $limit): array

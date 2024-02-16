@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-02-15T16:45:59.516Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="QxBTvyEAu-PgteMVLuGu" version="23.1.4" type="device">
+<mxfile host="app.diagrams.net" modified="2024-02-16T03:43:20.920Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="4Rj4zz2ctmjdhA3riq0Z" version="23.1.4" type="device">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
     <mxGraphModel dx="2901" dy="2288" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -101,8 +101,8 @@
         <mxCell id="yWIarv1gPrvqMUq48K27-26" value="https://&amp;lt;domain-name&amp;gt;/ImageboardWebapp/threads&lt;br&gt;メソッド：GET&lt;br&gt;パラメータなし&lt;br&gt;&lt;br&gt;＞ レスポンス&lt;br&gt;ステータス 200&lt;br&gt;text/html; charset=UTF-8" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="-460" y="190" width="320" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="yWIarv1gPrvqMUq48K27-27" value="https://&amp;lt;domain-name&amp;gt;/ImageboardWebapp/threads&lt;br&gt;メソッド：POST&lt;br&gt;Content-Type:&amp;nbsp;multipart/form-data&lt;br&gt;&lt;div&gt;subject: ユーザー入力（50文字以内）&lt;/div&gt;&lt;div&gt;content: ユーザー入力（65535バイト以内）&lt;/div&gt;&lt;div&gt;image: ユーザー入力（jpg, gif, pngファイル）&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;＞ レスポンス&lt;/div&gt;&lt;div&gt;ステータス 302&lt;/div&gt;&lt;div&gt;Location:&amp;nbsp;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
-          <mxGeometry x="320" y="660" width="330" height="230" as="geometry" />
+        <mxCell id="yWIarv1gPrvqMUq48K27-27" value="https://&amp;lt;domain-name&amp;gt;/ImageboardWebapp/threads&lt;br&gt;メソッド：POST&lt;br&gt;Content-Type:&amp;nbsp;multipart/form-data&lt;br&gt;&lt;div&gt;subject: ユーザー入力（50文字以内）&lt;/div&gt;&lt;div&gt;content: ユーザー入力（65535バイト以内）&lt;/div&gt;&lt;div&gt;image: ユーザー入力（jpg, gif, pngファイル）&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;＞ レスポンス&lt;/div&gt;&lt;div&gt;ステータス 302&lt;/div&gt;&lt;div&gt;Location:&amp;nbsp;/{post_id}/replies&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="320" y="660" width="340" height="180" as="geometry" />
         </mxCell>
         <mxCell id="yWIarv1gPrvqMUq48K27-28" value="https://&amp;lt;domain-name&amp;gt;/ImageboardWebapp/threads/{post_id}/replies&lt;br&gt;メソッド：GET" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;labelPosition=center;verticalLabelPosition=middle;verticalAlign=top;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
           <mxGeometry x="211" y="30" width="405" height="70" as="geometry" />

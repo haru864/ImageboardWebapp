@@ -9,7 +9,7 @@ class Post implements Model
 {
     use GenericModel;
 
-    public int $postId;
+    public ?int $postId;
     public ?int $replyToId;
     public ?string $subject;
     public string $content;
@@ -38,7 +38,7 @@ class Post implements Model
         $this->thumbnailPath = $thumbnailPath;
     }
 
-    public function getPostId(): int
+    public function getPostId(): ?int
     {
         return $this->postId;
     }

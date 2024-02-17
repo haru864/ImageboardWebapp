@@ -11,6 +11,7 @@ $base_url = Settings::env("BASE_URL");
 <head>
     <meta charset="UTF-8">
     <title>Imageboard Webapp</title>
+    <link rel="icon" href="data:,">
     <style>
         .form-row {
             display: flex;
@@ -31,24 +32,22 @@ $base_url = Settings::env("BASE_URL");
 <body>
     <div>
         <h2>スレッド一覧</h2>
-        <?php if (empty($mainPosts)) : ?>
+        <?php if (empty($threads)) : ?>
             <p>表示可能なスレッドがありません。</p>
         <?php endif; ?>
         <ul>
-            <?php foreach ($mainPosts as $post) : ?>
+            <?php foreach ($threads as $thread) : ?>
                 <li>
-                    <h2><?= htmlspecialchars($post['subject']) ?></h2>
-                    <p><?= htmlspecialchars($post['content']) ?></p>
-                    <?php if ($post['image_path']) : ?>
+                    <h2><?= htmlspecialchars($thread->getSubject()) ?></h2>
+                    <p><?= htmlspecialchars($thread->getContent()) ?></p>
+                    <!-- <?php if ($post['image_path']) : ?>
                         <img src="<?= htmlspecialchars($post['image_path']) ?>" alt="Post Image">
-                    <?php endif; ?>
+                    <?php endif; ?> -->
+                    <?php $replies = $replyMap[$thread->getPostId()] ?>
                     <ul>
-                        <?php foreach ($post['replies'] as $reply) : ?>
+                        <?php foreach ($replies as $reply) : ?>
                             <li>
-                                <p><?= htmlspecialchars($reply['content']) ?></p>
-                                <?php if ($reply['image_path']) : ?>
-                                    <img src="<?= htmlspecialchars($reply['image_path']) ?>" alt="Reply Image">
-                                <?php endif; ?>
+                                <p><?= htmlspecialchars($reply->getContent()) ?></p>
                             </li>
                         <?php endforeach; ?>
                     </ul>

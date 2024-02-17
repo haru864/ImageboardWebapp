@@ -13,6 +13,8 @@ use Exceptions\InvalidRequestMethodException;
 use Exceptions\InvalidRequestURIException;
 use Models\Post;
 
+// TODO 入力データの検証ロジックを入れる
+
 $manageThreads = function (Request $request): HTTPRenderer {
     if ($request->getMethod() == 'GET') {
         return displayThreads($request);
@@ -36,7 +38,28 @@ $manageReplies = function (Request $request): HTTPRenderer {
 // TODO 作成済みのスレッドを表示できるようにする
 function displayThreads(Request $request): HTMLRenderer
 {
-    return new HTMLRenderer(200, 'threads', []);
+    $postDAO = new PostDAOImpl();
+    $threadPosts = $postDAO->getAllThreads();
+
+    // $logger = Logging\Logger::getInstance();
+    // $logger->log(Logging\LogLevel::DEBUG, gettype($threadPosts) . '(' . count($threadPosts) . ')');
+
+
+    $replyPostMap = [];
+    foreach ($threadPosts as $threadPost) {
+
+        // $logger->log(Logging\LogLevel::DEBUG, gettype($threadPost));
+
+        $replyPosts = $postDAO->getReplies($threadPost, 0, 5);
+
+        // $logger->log(Logging\LogLevel::DEBUG, gettype($replyPosts) . '(' . count($replyPosts) . ')');
+        // if (count($replyPosts) > 0) {
+        //     $logger->log(Logging\LogLevel::DEBUG, gettype($replyPosts[0]));
+        // }
+
+        $replyPostMap[$threadPost->getPostId()] = $replyPosts;
+    }
+    return new HTMLRenderer(200, 'threads', ['threads' => $threadPosts, 'replyMap' => $replyPostMap]);
 };
 
 // TODO 画像を登録できるようにする

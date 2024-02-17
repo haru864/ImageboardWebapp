@@ -80,17 +80,20 @@ class PostDAOImpl implements PostDAO
         return $mysqli->insert_id;
     }
 
-    public function getAllThreads(int $offset, int $limit): array
+    public function getAllThreads(?int $offset = null, ?int $limit = null): array
     {
         $mysqli = DatabaseManager::getMysqliConnection();
-        $query = <<<SQL
-            SELECT * FROM post WHERE reply_to_id IS NULL LIMIT ? OFFSET ?;
-        SQL;
-        $postRecords = $mysqli->prepareAndFetchAll($query, 'ii', [$offset, $limit]);
-        return $postRecords;
+        if (is_null($offset) || is_null($limit)) {
+            $query = "SELECT * FROM post WHERE reply_to_id IS NULL";
+            $postRecords = $mysqli->prepareAndFetchAll($query, '', []);
+        } else {
+            $query = "SELECT * FROM post WHERE reply_to_id IS NULL LIMIT ? OFFSET ?";
+            $postRecords = $mysqli->prepareAndFetchAll($query, 'ii', [$offset, $limit]);
+        }
+        return $this->convertRecordArrayToPostArray($postRecords);
     }
 
-    public function getReplies(Post $postData, int $offset = null, ?int $limit = null): array
+    public function getReplies(Post $postData, ?int $offset = null, ?int $limit = null): array
     {
         $mysqli = DatabaseManager::getMysqliConnection();
         if (is_null($offset) || is_null($limit)) {
@@ -98,9 +101,19 @@ class PostDAOImpl implements PostDAO
             $postRecords = $mysqli->prepareAndFetchAll($query, 'i', [$postData->getPostId()]);
         } else {
             $query = "SELECT * FROM post WHERE reply_to_id = ? LIMIT ? OFFSET ?";
-            $postRecords = $mysqli->prepareAndFetchAll($query, 'iii', [$postData->getPostId(), $offset, $limit]);
+            $postRecords = $mysqli->prepareAndFetchAll($query, 'iii', [$postData->getPostId(), $limit, $offset]);
         }
-        return $postRecords;
+        return $this->convertRecordArrayToPostArray($postRecords);
+    }
+
+    private function convertRecordArrayToPostArray(array $records)
+    {
+        $posts = [];
+        foreach ($records as $record) {
+            $post = $this->convertRecordToPost($record);
+            array_push($posts, $post);
+        }
+        return $posts;
     }
 
     private function convertRecordToPost(array $data): Post

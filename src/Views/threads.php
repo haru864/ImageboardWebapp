@@ -40,9 +40,11 @@ $base_url = Settings::env("BASE_URL");
                 <li>
                     <h2><?= htmlspecialchars($thread->getSubject()) ?></h2>
                     <p><?= htmlspecialchars($thread->getContent()) ?></p>
-                    <!-- <?php if ($post['image_path']) : ?>
-                        <img src="<?= htmlspecialchars($post['image_path']) ?>" alt="Post Image">
-                    <?php endif; ?> -->
+                    <?php $imageFileName = $thread->getImageFileName(); ?>
+                    <?php if (isset($imageFileName)) : ?>
+                        <?php $thumbnailURI = $base_url . '/images?id=' . $thread->getPostId() . '&type=thumbnail'; ?>
+                        <img src="<?= $thumbnailURI ?>" alt="thumbnail">
+                    <?php endif; ?>
                     <?php $replies = $replyMap[$thread->getPostId()] ?>
                     <ul>
                         <?php foreach ($replies as $reply) : ?>
@@ -74,6 +76,8 @@ $base_url = Settings::env("BASE_URL");
         </form>
     </div>
     <script>
+        document.getElementById('submitBtn').addEventListener('click', sendNewThreadData);
+
         function validateSubject() {
             const MAX_SUBJECT_LENGTH = 50;
             let subject = document.getElementById('subject').value;
@@ -104,7 +108,7 @@ $base_url = Settings::env("BASE_URL");
             }
         }
 
-        async function createThread() {
+        async function sendNewThreadData() {
             try {
                 validateSubject();
                 validateContent();

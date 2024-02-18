@@ -10,15 +10,40 @@ use Exceptions\QueryFailedException;
 
 class PostDAOImpl implements PostDAO
 {
-    public function create(Post $postData): int
+    public function create(Post $post): int
     {
-        if ($postData->getPostId() !== null) {
+        if ($post->getPostId() !== null) {
             throw new InvalidDataException('Cannot create a post with id.');
         }
-        if ($postData->getContent() === null) {
+        if ($post->getContent() === null) {
             throw new InvalidDataException('Cannot create a post with null.');
         }
-        return $this->createOrUpdate($postData);
+        $mysqli = DatabaseManager::getMysqliConnection();
+        $query = <<<SQL
+            INSERT INTO post (
+                reply_to_id, subject, content, created_at, updated_at, image_file_name, image_file_extension
+            )
+            VALUES (
+                ?, ?, ?, ?, ?, ?, ?
+            )
+        SQL;
+        $result = $mysqli->prepareAndExecute(
+            $query,
+            'issssss',
+            [
+                $post->getReplyToId(),
+                $post->getSubject(),
+                $post->getContent(),
+                $post->getCreatedAt(),
+                $post->getUpdatedAt(),
+                $post->getImageFileName(),
+                $post->getImageFileExtension()
+            ],
+        );
+        if (!$result) {
+            throw new QueryFailedException('INSERT failed.');
+        }
+        return $mysqli->insert_id;
     }
 
     public function getById(int $id): ?Post
@@ -28,16 +53,44 @@ class PostDAOImpl implements PostDAO
         return $postRecord === null ? null : $this->convertRecordToPost($postRecord);
     }
 
-    public function update(Post $postData): bool
+    public function update(Post $post): bool
     {
-        if ($postData->getPostId() === null) {
+        if ($post->getPostId() === null) {
             throw new InvalidDataException('Post specified has no ID.');
         }
-        $postRecord = $this->getById($postData->getPostId());
+        $postRecord = $this->getById($post->getPostId());
         if ($postRecord === null) {
-            throw new InvalidDataException(sprintf("Post '%s' does not exist.", $postData->getPostId()));
+            throw new InvalidDataException(sprintf("Post-ID '%s' does not exist.", $post->getPostId()));
         }
-        return $this->createOrUpdate($postData);
+        $mysqli = DatabaseManager::getMysqliConnection();
+        $query = <<<SQL
+            UPDATE post
+            SET
+                reply_to_id = ?,
+                subject = ?,
+                content = ?,
+                updated_at = ?,
+                image_file_name = ?,
+                image_file_extension = ?
+            WHERE post_id = ?
+        SQL;
+        $result = $mysqli->prepareAndExecute(
+            $query,
+            'isssssi',
+            [
+                $post->getReplyToId(),
+                $post->getSubject(),
+                $post->getContent(),
+                $post->getUpdatedAt(),
+                $post->getImageFileName(),
+                $post->getImageFileExtension(),
+                $post->getPostId()
+            ],
+        );
+        if (!$result) {
+            throw new QueryFailedException('UPDATE failed.');
+        }
+        return $mysqli->insert_id;
     }
 
     public function delete(int $id): bool
@@ -69,9 +122,8 @@ class PostDAOImpl implements PostDAO
                 $postData->getContent(),
                 $postData->getCreatedAt(),
                 $postData->getUpdatedAt(),
-                $postData->getImagePath(),
-                $postData->getThumbnailPath(),
-                $postData->getUpdatedAt()
+                $postData->getImageFileName(),
+                $postData->getImageFileExtension()
             ],
         );
         if (!$result) {
@@ -125,8 +177,8 @@ class PostDAOImpl implements PostDAO
             content: $data['content'],
             createdAt: $data['created_at'],
             updatedAt: $data['updated_at'],
-            imagePath: $data['image_path'],
-            thumbnailPath: $data['thumbnail_path']
+            imageFileName: $data['image_file_name'],
+            imageFileExtension: $data['image_file_extension']
         );
     }
 }

@@ -15,8 +15,8 @@ class Post implements Model
     public string $content;
     public string $createdAt;
     public string $updatedAt;
-    public string $imagePath;
-    public string $thumbnailPath;
+    public ?string $imageFileName;
+    public ?string $imageFileExtension;
 
     public function __construct(
         ?int $postId,
@@ -25,8 +25,8 @@ class Post implements Model
         string $content,
         string $createdAt,
         string $updatedAt,
-        string $imagePath,
-        string $thumbnailPath
+        ?string $imageFileName,
+        ?string $imageFileExtension
     ) {
         $this->postId = $postId;
         $this->replyToId = $replyToId;
@@ -34,8 +34,8 @@ class Post implements Model
         $this->content = $content;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
-        $this->imagePath = $imagePath;
-        $this->thumbnailPath = $thumbnailPath;
+        $this->imageFileName = $imageFileName;
+        $this->imageFileExtension = $imageFileExtension;
     }
 
     public function getPostId(): ?int
@@ -98,23 +98,23 @@ class Post implements Model
         $this->updatedAt = $updatedAt;
     }
 
-    public function getImagePath(): string
+    public function getImageFileName(): ?string
     {
-        return $this->imagePath;
+        return $this->imageFileName;
     }
 
-    public function setImagePath(string $imagePath): void
+    public function setImageFileName(string $imageFileName): void
     {
-        $this->imagePath = $imagePath;
+        $this->imageFileName = $imageFileName;
     }
 
-    public function getThumbnailPath(): string
+    public function getImageFileExtension(): ?string
     {
-        return $this->thumbnailPath;
+        return $this->imageFileExtension;
     }
 
-    public function setThumbnailPath(string $thumbnailPath): void
+    public function setImageFileExtension(string $imageFileExtension): void
     {
-        $this->thumbnailPath = $thumbnailPath;
+        $this->imageFileExtension = $imageFileExtension;
     }
 }

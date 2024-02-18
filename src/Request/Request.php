@@ -4,6 +4,7 @@ namespace Request;
 
 use Exceptions\InvalidRequestMethodException;
 use Exceptions\InvalidContentTypeException;
+use Exceptions\InvalidRequestURIException;
 
 class Request
 {
@@ -63,5 +64,21 @@ class Request
     public function getFileParamArray(): array
     {
         return $this->fileParamArray;
+    }
+
+    public function getPostId(): int
+    {
+        $PATTERN_CATCHING_POST_ID = '/^\/ImageboardWebapp\/threads\/(\d+)\/replies$/';
+        if (preg_match($PATTERN_CATCHING_POST_ID, $this->uri, $matches)) {
+            $postIdString = $matches[1];
+        } else {
+            throw new InvalidRequestURIException('URI for replies must contain post_id.');
+        }
+        return (int)$postIdString;
+    }
+
+    public function getQueryValue(string $key): string
+    {
+        return $this->queryStringArray[$key];
     }
 }

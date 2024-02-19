@@ -32,24 +32,20 @@ $base_url = Settings::env("BASE_URL");
     <div>
         <h2>スレッド：<?= $thread->getSubject() ?></h2>
         <h4><?= $thread->getContent() ?></h4>
+        <?php $imageFileName = $thread->getImageFileName(); ?>
+        <?php if (isset($imageFileName)) : ?>
+            <?php $thumbnailURI = $base_url . '/images?id=' . $thread->getPostId() . '&type=thumbnail'; ?>
+            <img src="<?= $thumbnailURI ?>" alt="thumbnail">
+        <?php endif; ?>
         <ul>
-            <?php foreach ($mainPosts as $post) : ?>
+            <?php foreach ($replies as $reply) : ?>
                 <li>
-                    <h2><?= htmlspecialchars($post['subject']) ?></h2>
-                    <p><?= htmlspecialchars($post['content']) ?></p>
-                    <?php if ($post['image_path']) : ?>
-                        <img src="<?= htmlspecialchars($post['image_path']) ?>" alt="Post Image">
+                    <p><?= $reply->getContent() ?></p>
+                    <?php $imageFileName = $reply->getImageFileName(); ?>
+                    <?php if (isset($imageFileName)) : ?>
+                        <?php $thumbnailURI = $base_url . '/images?id=' . $reply->getPostId() . '&type=thumbnail'; ?>
+                        <img src="<?= $thumbnailURI ?>" alt="thumbnail">
                     <?php endif; ?>
-                    <ul>
-                        <?php foreach ($post['replies'] as $reply) : ?>
-                            <li>
-                                <p><?= htmlspecialchars($reply['content']) ?></p>
-                                <?php if ($reply['image_path']) : ?>
-                                    <img src="<?= htmlspecialchars($reply['image_path']) ?>" alt="Reply Image">
-                                <?php endif; ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
                 </li>
             <?php endforeach; ?>
         </ul>

@@ -47,20 +47,12 @@ $manageImage = function (Request $request): HTTPRenderer {
     $post = $postDAO->getById($postId);
     $imageFileName = $post->getImageFileName();
     $imageFileType = $post->getImageFileExtension();
-    // $imageFileExtension = $post->getImageFileExtension();
-
     $type = $request->getQueryValue('type');
     if ($type == 'original') {
         $imageFilePath = Settings::env('UPLOADED_IMAGE_FILE_LOCATION') . '/' . $imageFileName;
         $imageData = file_get_contents($imageFilePath);
         $encodedImage = base64_encode($imageData);
-
-        $logger = Logging\Logger::getInstance();
-        $logger->log(Logging\LogLevel::DEBUG, $imageFilePath);
-        $logger->log(Logging\LogLevel::DEBUG, $imageData);
-        $logger->log(Logging\LogLevel::DEBUG, $encodedImage);
-
-        return new HTMLRenderer(200, 'image', ['encodedImage' => $encodedImage]);
+        return new HTMLRenderer(200, 'image', ['mimeType' => $post->getImageFileExtension(), 'encodedImage' => $encodedImage]);
     } else if ($type == 'thumbnail') {
         $thumbnailFilePath = Settings::env('THUMBNAIL_FILE_LOCATION') . '/' . $imageFileName;
         // file_get_contentsじゃなくてreadfileで出力するほうが効率が良いが、
@@ -71,7 +63,6 @@ $manageImage = function (Request $request): HTTPRenderer {
     }
 };
 
-// TODO 画像を表示できるようにする
 // TODO スレッドをクリックしてリプライ一覧を表示できるようにする
 function displayThreads(Request $request): HTMLRenderer
 {
@@ -116,7 +107,6 @@ function createThread(Request $request): RedirectRenderer
     $postId = $postDAO->create($newThreadPost);
 
     $storagedFileName = preserveUploadedImageFile($postId, $currentDateTime);
-    // $uploadFileExtension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
     $uploadFileExtension = $_FILES["image"]["type"];
 
     $newThreadPost->setPostId($postId);
@@ -137,7 +127,6 @@ function displayReplies(Request $request): HTMLRenderer
     return new HTMLRenderer(200, 'replies', ['thread' => $threadPost, 'replies' => $replies]);
 };
 
-// TODO 画像を登録できるようにする
 function createReply(Request $request): JSONRenderer
 {
     $postId = $request->getPostId();
@@ -149,11 +138,20 @@ function createReply(Request $request): JSONRenderer
         content: $request->getTextParam('content'),
         createdAt: $currentDateTime,
         updatedAt: $currentDateTime,
-        imagePath: 'DummyImagePath',
-        thumbnailPath: 'DummyThumnailPath'
+        imageFileName: null,
+        imageFileExtension: null
     );
     $postDAO = new PostDAOImpl();
     $postId = $postDAO->create($replyPost);
+
+    $storagedFileName = preserveUploadedImageFile($postId, $currentDateTime);
+    $uploadFileExtension = $_FILES["image"]["type"];
+
+    $replyPost->setPostId($postId);
+    $replyPost->setImageFileName($storagedFileName);
+    $replyPost->setImageFileExtension($uploadFileExtension);
+    $postDAO->update($replyPost);
+
     return new JSONRenderer(200, []);
 }
 

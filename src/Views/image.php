@@ -14,7 +14,7 @@ $base_url = Settings::env("BASE_URL");
 </head>
 
 <body>
-    <img src="data:image/jpeg;base64,<?= $encodedImage ?>" alt="image">
+    <img src="data:<?= $mimeType ?>;base64,<?= $encodedImage ?>" alt="image">
 </body>
 
 </html>

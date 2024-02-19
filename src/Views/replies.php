@@ -35,7 +35,9 @@ $base_url = Settings::env("BASE_URL");
         <?php $imageFileName = $thread->getImageFileName(); ?>
         <?php if (isset($imageFileName)) : ?>
             <?php $thumbnailURI = $base_url . '/images?id=' . $thread->getPostId() . '&type=thumbnail'; ?>
-            <img src="<?= $thumbnailURI ?>" alt="thumbnail">
+            <a href="<?= $base_url ?>/images?id=<?= $thread->getPostId() ?>&type=original">
+                <img src="<?= $thumbnailURI ?>" alt="thumbnail">
+            </a>
         <?php endif; ?>
         <ul>
             <?php foreach ($replies as $reply) : ?>
@@ -44,7 +46,9 @@ $base_url = Settings::env("BASE_URL");
                     <?php $imageFileName = $reply->getImageFileName(); ?>
                     <?php if (isset($imageFileName)) : ?>
                         <?php $thumbnailURI = $base_url . '/images?id=' . $reply->getPostId() . '&type=thumbnail'; ?>
-                        <img src="<?= $thumbnailURI ?>" alt="thumbnail">
+                        <a href="<?= $base_url ?>/images?id=<?= $reply->getPostId() ?>&type=original">
+                            <img src="<?= $thumbnailURI ?>" alt="thumbnail">
+                        </a>
                     <?php endif; ?>
                 </li>
             <?php endforeach; ?>

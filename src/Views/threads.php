@@ -38,8 +38,10 @@ $base_url = Settings::env("BASE_URL");
         <ul>
             <?php foreach ($threads as $thread) : ?>
                 <li>
-                    <h2><?= htmlspecialchars($thread->getSubject()) ?></h2>
-                    <p><?= htmlspecialchars($thread->getContent()) ?></p>
+                    <a href="<?= $base_url ?>/threads/<?= $thread->getPostId() ?>/replies">
+                        <h2><?= $thread->getSubject() ?></h2>
+                    </a>
+                    <p><?= $thread->getContent() ?></p>
                     <?php $imageFileName = $thread->getImageFileName(); ?>
                     <?php if (isset($imageFileName)) : ?>
                         <?php $thumbnailURI = $base_url . '/images?id=' . $thread->getPostId() . '&type=thumbnail'; ?>

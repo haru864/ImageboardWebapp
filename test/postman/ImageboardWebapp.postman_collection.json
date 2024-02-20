@@ -1,0 +1,265 @@
+{
+	"info": {
+		"_postman_id": "586fef76-a7c4-4679-8ee1-c1cca822877e",
+		"name": "ImageboardWebapp",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16083717"
+	},
+	"item": [
+		{
+			"name": "スレッド一覧表示",
+			"item": [
+				{
+					"name": "[正常系]スレッド一覧画面取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/ImageboardWebapp/threads",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"ImageboardWebapp",
+								"threads"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "[正常系]スレッド一覧画面取得",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8000/ImageboardWebapp/threads",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8000",
+									"path": [
+										"ImageboardWebapp",
+										"threads"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "html",
+							"header": [
+								{
+									"key": "Host",
+									"value": "localhost:8000"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 15 Feb 2024 12:17:47 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "close"
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "PHP/8.2.15"
+								},
+								{
+									"key": "Content-Type",
+									"value": "text/html; charset=UTF-8"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								}
+							],
+							"cookie": [],
+							"body": "\n<!doctype html><html lang=\"ja\"><head><meta charset=\"UTF-8\"><title>Imageboard Webapp</title><style>\n        .form-row {\n            display: flex;\n            align-items: center;\n            margin-bottom: 10px;\n        }\n\n        label {\n            margin-right: 10px;\n        }\n\n        textarea {\n            resize: vertical;\n        }\n    </style></head><body><div><h2>スレッド一覧</h2><p>表示可能なスレッドがありません。</p><ul>\n                    </ul></div><div><h2>スレッドを作成する</h2><form id=\"createThread\"><div class=\"form-row\"><label for=\"subject\">主題(50文字まで):</label><input type=\"text\" id=\"subject\" name=\"subject\" size=\"50\">\n            </div><div class=\"form-row\"><label for=\"content\">本文:</label><textarea id=\"content\" name=\"content\" rows=\"5\" cols=\"80\"></textarea></div><div class=\"form-row\"><label for=\"image\">画像:</label><input type=\"file\" id=\"image\" name=\"image\">\n            </div><button type=\"button\" id=\"submitBtn\">作成</button></form>\n    </div><script>\n        function validateSubject() {\n            const MAX_SUBJECT_LENGTH = 50;\n            let subject = document.getElementById('subject').value;\n            if (subject.length > MAX_SUBJECT_LENGTH) {\n                throw new Exception(`主題は${MAX_SUBJECT_LENGTH}文字以内にしてください。`);\n            }\n            return;\n        }\n\n        function validateContent() {\n            const MAX_MYSQL_TEXT_BYTES = 65535;\n            let content = document.getElementById('content').value;\n            let byteSize = new Blob([content]).size;\n            if (byteSize > MAX_SUBJECT_LENGTH) {\n                throw new Exception(`本文のサイズが大きすぎます。${MAX_MYSQL_TEXT_BYTES}バイト以内にしてください。`);\n            }\n            return;\n        }\n\n        function validateFile() {\n            const VALID_FILES = ['jpg', 'jpeg', 'png', 'gif'];\n            let fileInput = document.getElementById('image');\n            let file = fileInput.files[0];\n            let fileName = file.name;\n            let extension = fileName.split('.').pop().toLowerCase();\n            if (!VALID_FILES.includes(extension)) {\n                throw new Error(`${VALID_FILES.join(',')}のみアップロードできます。`);\n            }\n        }\n\n        async function createThread() {\n            try {\n                validateSubject();\n                validateContent();\n                validateFile();\n                let action = 'create';\n                let subject = document.getElementById('subject').value;\n                let content = document.getElementById('content').value;\n                let image = document.getElementById('image');\n\n                \n                let formElement = document.querySelector(\"form\");\n                let formData = new FormData(formElement);\n                let response = await fetch('http://localhost:8000/ImageboardWebapp/register', {\n                    method: \"POST\",\n                    body: formData\n                });\n                if (!response.ok) {\n                    document.body.innerHTML = await response.text();\n                    return;\n                }\n                const data = await response.json();\n                showPopup(data['view_url'], data['delete_url']);\n            } catch (error) {\n                console.error('Error:', error);\n                alert(error);\n            }\n        }\n    </script></body>\n\n</html>"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "スレッド作成",
+			"item": [
+				{
+					"name": "[正常系]スレッド作成",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "subject",
+									"value": "DummySubject",
+									"type": "text"
+								},
+								{
+									"key": "content",
+									"value": "DummyContent",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/home/haru/Pictures/icon_01 (1).jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/ImageboardWebapp/threads",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"ImageboardWebapp",
+								"threads"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "リプライ一覧表示",
+			"item": [
+				{
+					"name": "[正常系]リプライ一覧表示",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/ImageboardWebapp/threads/8/replies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"ImageboardWebapp",
+								"threads",
+								"8",
+								"replies"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "リプライ投稿",
+			"item": [
+				{
+					"name": "[正常系]リプライ投稿",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "content",
+									"value": "takinaaaaaaa",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/home/haru/Pictures/25_icon_takina2.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8000/ImageboardWebapp/threads/8/replies",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"ImageboardWebapp",
+								"threads",
+								"8",
+								"replies"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "画像取得",
+			"item": [
+				{
+					"name": "サムネイル取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/ImageboardWebapp/images?id=8&type=thumbnail",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"ImageboardWebapp",
+								"images"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "8"
+								},
+								{
+									"key": "type",
+									"value": "thumbnail"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "オリジナル取得",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8000/ImageboardWebapp/images?id=8&type=original",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"ImageboardWebapp",
+								"images"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "8"
+								},
+								{
+									"key": "type",
+									"value": "original"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

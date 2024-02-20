@@ -63,27 +63,13 @@ $manageImage = function (Request $request): HTTPRenderer {
     }
 };
 
-// TODO スレッドをクリックしてリプライ一覧を表示できるようにする
 function displayThreads(Request $request): HTMLRenderer
 {
     $postDAO = new PostDAOImpl();
     $threadPosts = $postDAO->getAllThreads();
-
-    // $logger = Logging\Logger::getInstance();
-    // $logger->log(Logging\LogLevel::DEBUG, gettype($threadPosts) . '(' . count($threadPosts) . ')');
-
     $replyPostMap = [];
     foreach ($threadPosts as $threadPost) {
-
-        // $logger->log(Logging\LogLevel::DEBUG, gettype($threadPost));
-
         $replyPosts = $postDAO->getReplies($threadPost, 0, 5);
-
-        // $logger->log(Logging\LogLevel::DEBUG, gettype($replyPosts) . '(' . count($replyPosts) . ')');
-        // if (count($replyPosts) > 0) {
-        //     $logger->log(Logging\LogLevel::DEBUG, gettype($replyPosts[0]));
-        // }
-
         $replyPostMap[$threadPost->getPostId()] = $replyPosts;
     }
     return new HTMLRenderer(200, 'threads', ['threads' => $threadPosts, 'replyMap' => $replyPostMap]);

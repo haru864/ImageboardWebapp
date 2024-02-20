@@ -68,6 +68,9 @@ $base_url = Settings::env("BASE_URL");
             <button type="button" id="submitBtn">リプライ</button>
         </form>
     </div>
+    <div>
+        <button type="button" onclick="history.back()">戻る</button>
+    </div>
     <script>
         function validateContent() {
             const MAX_MYSQL_TEXT_BYTES = 65535;

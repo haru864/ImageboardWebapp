@@ -39,9 +39,9 @@ $base_url = Settings::env("BASE_URL");
             <?php foreach ($threads as $thread) : ?>
                 <li>
                     <a href="<?= $base_url ?>/threads/<?= $thread->getPostId() ?>/replies">
-                        <h2><?= $thread->getSubject() ?></h2>
+                        <h2><?= htmlspecialchars($thread->getSubject()) ?></h2>
                     </a>
-                    <p><?= $thread->getContent() ?></p>
+                    <p><?= htmlspecialchars($thread->getContent()) ?></p>
                     <?php $imageFileName = $thread->getImageFileName(); ?>
                     <?php if (isset($imageFileName)) : ?>
                         <?php $thumbnailURI = $base_url . '/images?id=' . $thread->getPostId() . '&type=thumbnail'; ?>
@@ -92,8 +92,8 @@ $base_url = Settings::env("BASE_URL");
         function validateContent() {
             const MAX_MYSQL_TEXT_BYTES = 65535;
             let content = document.getElementById('content').value;
-            let byteSize = new Blob([content]).size;
-            if (byteSize > MAX_SUBJECT_LENGTH) {
+            let contentByteSize = new Blob([content]).size;
+            if (contentByteSize > MAX_MYSQL_TEXT_BYTES) {
                 throw new Exception(`本文のサイズが大きすぎます。${MAX_MYSQL_TEXT_BYTES}バイト以内にしてください。`);
             }
             return;
@@ -123,14 +123,16 @@ $base_url = Settings::env("BASE_URL");
                 let formData = new FormData(formElement);
                 let response = await fetch('<?= $base_url ?>/threads', {
                     method: "POST",
-                    body: formData
+                    body: formData,
+                    // redirect: "follow"
+                    redirect: "manual"
                 });
+                console.log(response);
                 if (!response.ok) {
-                    document.body.innerHTML = await response.text();
-                    return;
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                showPopup(data['view_url'], data['delete_url']);
+                return data;
             } catch (error) {
                 console.error('Error:', error);
                 alert(error);

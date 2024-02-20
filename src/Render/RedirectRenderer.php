@@ -7,10 +7,12 @@ use Render\Interface\HTTPRenderer;
 class RedirectRenderer implements HTTPRenderer
 {
     private string $redirectUrl;
+    private array $data;
 
-    public function __construct(string $redirectUrl)
+    public function __construct(string $redirectUrl, array $data)
     {
         $this->redirectUrl = $redirectUrl;
+        $this->data = $data;
     }
 
     public function getStatusCode(): int
@@ -22,11 +24,12 @@ class RedirectRenderer implements HTTPRenderer
     {
         return [
             'Location' => $this->redirectUrl,
+            'Content-Type' => 'application/json; charset=UTF-8'
         ];
     }
 
     public function getContent(): string
     {
-        return '';
+        return json_encode($this->data, JSON_THROW_ON_ERROR);
     }
 }

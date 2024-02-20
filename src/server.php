@@ -40,6 +40,7 @@ try {
     if (is_null($renderer)) {
         http_response_code(404);
         echo "404 Not Found: The requested route was not found on this server.";
+        $logger->log(LogLevel::ERROR, $e->getMessage() . PHP_EOL . $e->getTraceAsString());
     }
 
     foreach ($renderer->getFields() as $name => $value) {

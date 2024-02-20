@@ -30,8 +30,8 @@ $base_url = Settings::env("BASE_URL");
 
 <body>
     <div>
-        <h2>スレッド：<?= $thread->getSubject() ?></h2>
-        <h4><?= $thread->getContent() ?></h4>
+        <h2>スレッド：<?= htmlspecialchars($thread->getSubject()) ?></h2>
+        <h4><?= htmlspecialchars($thread->getContent()) ?></h4>
         <?php $imageFileName = $thread->getImageFileName(); ?>
         <?php if (isset($imageFileName)) : ?>
             <?php $thumbnailURI = $base_url . '/images?id=' . $thread->getPostId() . '&type=thumbnail'; ?>
@@ -42,7 +42,7 @@ $base_url = Settings::env("BASE_URL");
         <ul>
             <?php foreach ($replies as $reply) : ?>
                 <li>
-                    <p><?= $reply->getContent() ?></p>
+                    <p><?= htmlspecialchars($reply->getContent()) ?></p>
                     <?php $imageFileName = $reply->getImageFileName(); ?>
                     <?php if (isset($imageFileName)) : ?>
                         <?php $thumbnailURI = $base_url . '/images?id=' . $reply->getPostId() . '&type=thumbnail'; ?>

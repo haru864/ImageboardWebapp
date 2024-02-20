@@ -5,11 +5,41 @@ php console.php migrate
 
 # postテーブル
 post_id         INT             PK
-reply_to_id     INT             NULLABLE (スレッド作成時はNULL、それ以外は必須)
+reply_to_id     INT             NULLABLE (スレッド作成時はNULL、それ以外は必須、post_idを参照)
 subject         VARCHAR(50)     NULLABLE (スレッド作成時は必須、それ以外はNULL)
 content         TEXT            NOT NULL
 image_path      VARCHAR(255)    NULLABLE
 thumbnail_path  VARCHAR(255)    NULLABLE
 created_at      DATETIME        NOT NULL
-updated_at      DATETIME        NOT NULL
+updated_at      DATETIME        NOT NULL（リプライが投稿された時にリプライ投稿日時で更新する）
+
+# バリデーション
+スレッド一覧画面
+    subject (1)テキストデータであること
+                is_string()
+            (2)50文字以内であることを確認
+                mb_strlen()で文字列の長さを文字数で取得して検証する
+            (3)SQLインジェクション対策
+                バックエンドでpreepareとbind_paramを使う
+            (4)クロスサイトスクリプティング対策
+                HTML表示時にhtmlspecialchars()でエスケープする
+    content subjectと同じ
+    image   (1)画像ファイルであること
+                image/jpeg, image/png, image/gif
+            (2)ファイルサイズが上限に収まっていること
+                envファイルの設定値と比較する
+リプライ一覧画面
+    content スレッド一覧画面と同じ
+    image   スレッド一覧画面と同じ
+
+# エラーハンドリング
+    エラー原因を見せる
+        ユーザー入力データの検証エラー
+    エラー原因を見せない
+        上記以外すべて
+
+# スレッド削除
+    updated_atが一定時間より前のスレッドとそのリプライを削除する。
+    期間はenvファイルで設定する。（時間単位）
+    スレッド一覧画面表示時とcronでスケジュールした周期で実行する。
 

@@ -16,8 +16,6 @@ use Exceptions\InvalidRequestParameterException;
 use Exceptions\InvalidMimeTypeException;
 use Models\Post;
 
-// TODO 入力データの検証ロジックを入れる
-
 $manageThreads = function (Request $request): HTTPRenderer {
     if ($request->getMethod() == 'GET') {
         return displayThreads($request);
@@ -77,12 +75,18 @@ function displayThreads(Request $request): HTMLRenderer
 
 function createThread(Request $request): RedirectRenderer
 {
+    $subject = $request->getTextParam('subject');
+    $content = $request->getTextParam('content');
+    ValidationHelper::validateText($subject);
+    ValidationHelper::validateText($content);
+    ValidationHelper::validateImage();
+
     $currentDateTime = date('Y-m-d H:i:s');
     $newThreadPost = new Post(
         postId: null,
         replyToId: null,
-        subject: $request->getTextParam('subject'),
-        content: $request->getTextParam('content'),
+        subject: $subject,
+        content: $content,
         createdAt: $currentDateTime,
         updatedAt: $currentDateTime,
         imageFileName: null,
@@ -100,8 +104,9 @@ function createThread(Request $request): RedirectRenderer
     $newThreadPost->setImageFileExtension($uploadFileExtension);
     $postDAO->update($newThreadPost);
 
-    $redirectUrl = '/' . $postId . '/replies';
-    return new RedirectRenderer($redirectUrl);
+    $baseURL = Settings::env('BASE_URL');
+    $redirectURL = $baseURL . '/threads/' . $postId . '/replies';
+    return new RedirectRenderer($redirectURL, ['status' => 'success']);
 };
 
 function displayReplies(Request $request): HTMLRenderer
@@ -115,13 +120,17 @@ function displayReplies(Request $request): HTMLRenderer
 
 function createReply(Request $request): JSONRenderer
 {
+    $content = $request->getTextParam('content');
+    ValidationHelper::validateText($content);
+    ValidationHelper::validateImage();
+
     $postId = $request->getPostId();
     $currentDateTime = date('Y-m-d H:i:s');
     $replyPost = new Post(
         postId: null,
         replyToId: $postId,
         subject: null,
-        content: $request->getTextParam('content'),
+        content: $content,
         createdAt: $currentDateTime,
         updatedAt: $currentDateTime,
         imageFileName: null,

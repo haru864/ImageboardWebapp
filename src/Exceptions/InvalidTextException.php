@@ -5,7 +5,7 @@ namespace Exceptions;
 use Exceptions\Interface\UserVisibleException;
 use Exceptions\Traits\GenericUserVisibleException;
 
-class FileUploadLimitExceededException extends UserVisibleException
+class InvalidTextException extends UserVisibleException
 {
     use GenericUserVisibleException;
 

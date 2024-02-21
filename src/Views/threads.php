@@ -124,15 +124,13 @@ $base_url = Settings::env("BASE_URL");
                 let response = await fetch('<?= $base_url ?>/threads', {
                     method: "POST",
                     body: formData,
-                    // redirect: "follow"
-                    redirect: "manual"
+                    redirect: "follow"
                 });
                 console.log(response);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                const data = await response.json();
-                return data;
+                window.location.href = response.url;
             } catch (error) {
                 console.error('Error:', error);
                 alert(error);

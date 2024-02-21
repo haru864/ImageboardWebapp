@@ -11,6 +11,7 @@ $base_url = Settings::env("BASE_URL");
 <head>
     <meta charset="UTF-8">
     <title>Imageboard Webapp</title>
+    <link rel="icon" href="data:,">
     <style>
         .form-row {
             display: flex;

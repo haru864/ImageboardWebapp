@@ -1,12 +1,12 @@
 <?php
 
-namespace Request;
+namespace Http;
 
 use Exceptions\InvalidRequestMethodException;
 use Exceptions\InvalidContentTypeException;
 use Exceptions\InvalidRequestURIException;
 
-class Request
+class HttpRequest
 {
     private string $method;
     private string $uri;

@@ -9,43 +9,42 @@ use Render\JSONRenderer;
 use Render\ImageRenderer;
 use Render\RedirectRenderer;
 use Settings\Settings;
-use Request\Request;
+use Http\HttpRequest;
 use Exceptions\InvalidRequestMethodException;
-use Exceptions\InvalidRequestURIException;
 use Exceptions\InvalidRequestParameterException;
 use Exceptions\InvalidMimeTypeException;
 use Models\Post;
 
-$manageThreads = function (Request $request): HTTPRenderer {
-    if ($request->getMethod() == 'GET') {
-        return displayThreads($request);
-    } else if ($request->getMethod() == 'POST') {
-        return createThread($request);
+$manageThreads = function (HttpRequest $httpRequest): HTTPRenderer {
+    if ($httpRequest->getMethod() == 'GET') {
+        return displayThreads($httpRequest);
+    } else if ($httpRequest->getMethod() == 'POST') {
+        return createThread($httpRequest);
     } else {
         throw new InvalidRequestMethodException('Valid Methods: GET, POST');
     }
 };
 
-$manageReplies = function (Request $request): HTTPRenderer {
-    if ($request->getMethod() == 'GET') {
-        return displayReplies($request);
-    } else if ($request->getMethod() == 'POST') {
-        return createReply($request);
+$manageReplies = function (HttpRequest $httpRequest): HTTPRenderer {
+    if ($httpRequest->getMethod() == 'GET') {
+        return displayReplies($httpRequest);
+    } else if ($httpRequest->getMethod() == 'POST') {
+        return createReply($httpRequest);
     } else {
         throw new InvalidRequestMethodException('Valid Methods: GET, POST');
     }
 };
 
-$manageImage = function (Request $request): HTTPRenderer {
-    if ($request->getMethod() != 'GET') {
+$manageImage = function (HttpRequest $httpRequest): HTTPRenderer {
+    if ($httpRequest->getMethod() != 'GET') {
         throw new InvalidRequestMethodException('Valid Methods: GET');
     }
-    $postId = $request->getQueryValue('id');
+    $postId = $httpRequest->getQueryValue('id');
     $postDAO = new PostDAOImpl();
     $post = $postDAO->getById($postId);
     $imageFileName = $post->getImageFileName();
     $imageFileType = $post->getImageFileExtension();
-    $type = $request->getQueryValue('type');
+    $type = $httpRequest->getQueryValue('type');
     if ($type == 'original') {
         $imageFilePath = Settings::env('UPLOADED_IMAGE_FILE_LOCATION') . '/' . $imageFileName;
         $imageData = file_get_contents($imageFilePath);
@@ -61,7 +60,7 @@ $manageImage = function (Request $request): HTTPRenderer {
     }
 };
 
-function displayThreads(Request $request): HTMLRenderer
+function displayThreads(HttpRequest $httpRequest): HTMLRenderer
 {
     $postDAO = new PostDAOImpl();
     $threadPosts = $postDAO->getAllThreads();
@@ -73,10 +72,10 @@ function displayThreads(Request $request): HTMLRenderer
     return new HTMLRenderer(200, 'threads', ['threads' => $threadPosts, 'replyMap' => $replyPostMap]);
 };
 
-function createThread(Request $request): RedirectRenderer
+function createThread(HttpRequest $httpRequest): RedirectRenderer
 {
-    $subject = $request->getTextParam('subject');
-    $content = $request->getTextParam('content');
+    $subject = $httpRequest->getTextParam('subject');
+    $content = $httpRequest->getTextParam('content');
     ValidationHelper::validateText($subject);
     ValidationHelper::validateText($content);
     ValidationHelper::validateImage();
@@ -109,22 +108,22 @@ function createThread(Request $request): RedirectRenderer
     return new RedirectRenderer($redirectURL, ['status' => 'success']);
 };
 
-function displayReplies(Request $request): HTMLRenderer
+function displayReplies(HttpRequest $httpRequest): HTMLRenderer
 {
     $postDAO = new PostDAOImpl();
-    $postId = $request->getPostId();
+    $postId = $httpRequest->getPostId();
     $threadPost = $postDAO->getById($postId);
     $replies = $postDAO->getReplies($threadPost);
     return new HTMLRenderer(200, 'replies', ['thread' => $threadPost, 'replies' => $replies]);
 };
 
-function createReply(Request $request): JSONRenderer
+function createReply(HttpRequest $httpRequest): JSONRenderer
 {
-    $content = $request->getTextParam('content');
+    $content = $httpRequest->getTextParam('content');
     ValidationHelper::validateText($content);
     ValidationHelper::validateImage();
 
-    $postId = $request->getPostId();
+    $postId = $httpRequest->getPostId();
     $currentDateTime = date('Y-m-d H:i:s');
     $replyPost = new Post(
         postId: null,

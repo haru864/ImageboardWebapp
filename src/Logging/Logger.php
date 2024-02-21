@@ -2,7 +2,9 @@
 
 namespace Logging;
 
+use Http\HttpResponse;
 use Settings\Settings;
+use Throwable;
 
 class Logger
 {
@@ -57,5 +59,25 @@ class Logger
             'files_data' => $_FILES
         ];
         $this->log(LogLevel::INFO, 'Request received', ['request' => $requestInfo]);
+    }
+
+    public function logResponse(HttpResponse $httpResponse): void
+    {
+        $MAX_LENGTH_OF_OUTPUT_MESSAGE_BODY = 100;
+        $messageBody = $httpResponse->getMessageBody();
+        $outputMessageBody = substr($messageBody, 0, $MAX_LENGTH_OF_OUTPUT_MESSAGE_BODY)
+            . (strlen($messageBody) > $MAX_LENGTH_OF_OUTPUT_MESSAGE_BODY ? '...' : '');
+
+        $responseInfo = [
+            'status_code' => $httpResponse->getStatusCode() ?? 'N/A',
+            'headers' => $httpResponse->getHeaders() ?? 'N/A',
+            'message_body' => $outputMessageBody ?? 'N/A'
+        ];
+        $this->log(LogLevel::INFO, 'Response sent', ['response' => $responseInfo]);
+    }
+
+    public function logError(Throwable $e)
+    {
+        $this->log(LogLevel::ERROR, $e->getMessage() . PHP_EOL . $e->getTraceAsString());
     }
 }

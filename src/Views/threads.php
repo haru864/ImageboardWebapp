@@ -115,7 +115,6 @@ $base_url = Settings::env("BASE_URL");
                 validateSubject();
                 validateContent();
                 validateFile();
-                let action = 'create';
                 let subject = document.getElementById('subject').value;
                 let content = document.getElementById('content').value;
                 let image = document.getElementById('image');

@@ -15,7 +15,7 @@ class ValidationHelper
         if (!is_string($text)) {
             throw new InvalidTextException('Given string is not text.');
         }
-        if (isset($maxLength) && mb_strlen($text) > $maxLength) {
+        if (isset($maxNumOfChars) && mb_strlen($text) > $maxNumOfChars) {
             throw new InvalidTextException('Given string exceeds the maximum number of characters.');
         }
         if (isset($maxBytes) && strlen($text) > $maxBytes) {

@@ -12,21 +12,6 @@ $base_url = Settings::env("BASE_URL");
     <meta charset="UTF-8">
     <title>Imageboard Webapp</title>
     <link rel="icon" href="data:,">
-    <style>
-        .form-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        label {
-            margin-right: 10px;
-        }
-
-        textarea {
-            resize: vertical;
-        }
-    </style>
 </head>
 
 <body>
@@ -73,11 +58,13 @@ $base_url = Settings::env("BASE_URL");
         <button type="button" onclick="history.back()">戻る</button>
     </div>
     <script>
+        document.getElementById('submitBtn').addEventListener('click', sendReply);
+
         function validateContent() {
             const MAX_MYSQL_TEXT_BYTES = 65535;
             let content = document.getElementById('content').value;
             let byteSize = new Blob([content]).size;
-            if (byteSize > MAX_SUBJECT_LENGTH) {
+            if (byteSize > MAX_MYSQL_TEXT_BYTES) {
                 throw new Exception(`本文のサイズが大きすぎます。${MAX_MYSQL_TEXT_BYTES}バイト以内にしてください。`);
             }
             return;
@@ -94,12 +81,10 @@ $base_url = Settings::env("BASE_URL");
             }
         }
 
-        async function createThread() {
+        async function sendReply() {
             try {
                 validateContent();
                 validateFile();
-                let action = 'create';
-                let subject = document.getElementById('subject').value;
                 let content = document.getElementById('content').value;
                 let image = document.getElementById('image');
                 let formElement = document.querySelector("form");
@@ -112,8 +97,7 @@ $base_url = Settings::env("BASE_URL");
                     document.body.innerHTML = await response.text();
                     return;
                 }
-                const data = await response.json();
-                showPopup(data['view_url'], data['delete_url']);
+                location.reload();
             } catch (error) {
                 console.error('Error:', error);
                 alert(error);

@@ -2,8 +2,6 @@
 
 namespace Http;
 
-use Exceptions\InvalidRequestMethodException;
-use Exceptions\InvalidContentTypeException;
 use Exceptions\InvalidRequestURIException;
 
 class HttpRequest
@@ -26,9 +24,6 @@ class HttpRequest
             $queryString = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
             parse_str($queryString, $this->queryStringArray);
         } elseif ($this->method == 'POST') {
-            if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') === false) {
-                throw new InvalidContentTypeException('Valid Content-Type: multipart/form-data');
-            }
             foreach ($_POST as $key => $value) {
                 $this->textParamArray[$key] = $value;
             }
@@ -41,8 +36,6 @@ class HttpRequest
                     'size' => $file['size'],
                 ];
             }
-        } else {
-            throw new InvalidRequestMethodException('Valid Request Method: GET, POST');
         }
     }
 

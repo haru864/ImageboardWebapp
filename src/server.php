@@ -22,9 +22,9 @@ try {
     $httpResponse = new HttpResponse();
     $routes = include('Routing/routes.php');
     $renderer = null;
-    foreach ($routes as $uriPattern => $function) {
+    foreach ($routes as $uriPattern => $controller) {
         if (preg_match($uriPattern, $httpRequest->getURI())) {
-            $renderer = $function($httpRequest);
+            $renderer = $controller->assignProcess();
         }
     }
     if (is_null($renderer)) {

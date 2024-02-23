@@ -44,6 +44,11 @@ class ReplyService
         $postId = $this->postDAO->create($reply);
         $reply->setPostId($postId);
         $this->updateImage($reply);
+
+        $thread = $this->postDAO->getById($threadPostId);
+        $dateTime = new \DateTime();
+        $thread->setUpdatedAt($dateTime->format('Y-m-d H:i:s'));
+        $this->postDAO->update($thread);
         return;
     }
 

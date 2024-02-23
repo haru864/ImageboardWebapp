@@ -140,4 +140,12 @@ class ValidationHelper
             throw new InvalidMimeTypeException('The uploaded image is not in an approved format.');
         }
     }
+
+    public static function validateInteger(mixed $value): void
+    {
+        if (!is_int($value)) {
+            throw new \Exception("Value '$value' is not integer.");
+        }
+        return;
+    }
 }

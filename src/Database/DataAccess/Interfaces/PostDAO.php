@@ -10,7 +10,6 @@ interface PostDAO
     public function getById(int $id): ?Post;
     public function update(Post $postData): bool;
     public function delete(int $id): bool;
-    public function createOrUpdate(Post $postData): int;
 
     /**
      * @param int $offset

@@ -64,23 +64,27 @@ class PostDAOImpl implements PostDAO
         }
         $mysqli = DatabaseManager::getMysqliConnection();
         $query = <<<SQL
-            UPDATE post
+            UPDATE
+                post
             SET
                 reply_to_id = ?,
                 subject = ?,
                 content = ?,
+                created_at = ?,
                 updated_at = ?,
                 image_file_name = ?,
                 image_file_extension = ?
-            WHERE post_id = ?
+            WHERE
+                post_id = ?
         SQL;
         $result = $mysqli->prepareAndExecute(
             $query,
-            'isssssi',
+            'issssssi',
             [
                 $post->getReplyToId(),
                 $post->getSubject(),
                 $post->getContent(),
+                $post->getCreatedAt(),
                 $post->getUpdatedAt(),
                 $post->getImageFileName(),
                 $post->getImageFileExtension(),
@@ -97,39 +101,6 @@ class PostDAOImpl implements PostDAO
     {
         $mysqli = DatabaseManager::getMysqliConnection();
         return $mysqli->prepareAndExecute("DELETE FROM post WHERE id = ?", 'i', [$id]);
-    }
-
-    public function createOrUpdate(Post $postData): int
-    {
-        $mysqli = DatabaseManager::getMysqliConnection();
-        $query = <<<SQL
-            INSERT INTO post (
-                reply_to_id, subject, content, created_at, updated_at, image_path, thumbnail_path
-            )
-            VALUES (
-                ?, ?, ?, ?, ?, ?, ?
-            )
-            ON DUPLICATE KEY UPDATE
-                updated_at = ?
-            ;
-        SQL;
-        $result = $mysqli->prepareAndExecute(
-            $query,
-            'isssssss',
-            [
-                $postData->getReplyToId(),
-                $postData->getSubject(),
-                $postData->getContent(),
-                $postData->getCreatedAt(),
-                $postData->getUpdatedAt(),
-                $postData->getImageFileName(),
-                $postData->getImageFileExtension()
-            ],
-        );
-        if (!$result) {
-            throw new QueryFailedException('UPSERT post failed.');
-        }
-        return $mysqli->insert_id;
     }
 
     public function getAllThreads(?int $offset = null, ?int $limit = null): array
@@ -156,6 +127,21 @@ class PostDAOImpl implements PostDAO
             $postRecords = $mysqli->prepareAndFetchAll($query, 'iii', [$postData->getPostId(), $limit, $offset]);
         }
         return $this->convertRecordArrayToPostArray($postRecords);
+    }
+
+    public function deleteInactiveThreads(int $inactivePeriodHours)
+    {
+        $dateTime = new \DateTime();
+        $interval = \DateInterval::createFromDateString("{$inactivePeriodHours} hours");
+        $dateTime->add($interval);
+        $mysqli = DatabaseManager::getMysqliConnection();
+        $sql = <<<SQL
+            DELETE FROM
+                post
+            WHERE
+                updated_at < ?
+        SQL;
+        return $mysqli->prepareAndExecute($sql, 's', [$dateTime->format('Y-m-d H:i:s')]);
     }
 
     private function convertRecordArrayToPostArray(array $records)

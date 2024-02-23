@@ -57,30 +57,9 @@ $base_url = Settings::env("BASE_URL");
     <div>
         <button type="button" onclick="history.back()">戻る</button>
     </div>
+    <script type="text/javascript" src="<?= $base_url ?>/javascript?file=validation"></script>
     <script>
         document.getElementById('submitBtn').addEventListener('click', sendReply);
-
-        function validateContent() {
-            const MAX_MYSQL_TEXT_BYTES = 65535;
-            let content = document.getElementById('content').value;
-            let byteSize = new Blob([content]).size;
-            if (byteSize > MAX_MYSQL_TEXT_BYTES) {
-                throw new Exception(`本文のサイズが大きすぎます。${MAX_MYSQL_TEXT_BYTES}バイト以内にしてください。`);
-            }
-            return;
-        }
-
-        function validateFile() {
-            const VALID_FILES = ['jpg', 'jpeg', 'png', 'gif'];
-            let fileInput = document.getElementById('image');
-            let file = fileInput.files[0];
-            let fileName = file.name;
-            let extension = fileName.split('.').pop().toLowerCase();
-            if (!VALID_FILES.includes(extension)) {
-                throw new Error(`${VALID_FILES.join(',')}のみアップロードできます。`);
-            }
-        }
-
         async function sendReply() {
             try {
                 validateContent();

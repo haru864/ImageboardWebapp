@@ -86,6 +86,9 @@ class ValidationHelper
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
             throw new InvalidRequestMethodException("Valid method is 'GET', but " . $_SERVER['REQUEST_METHOD'] . " given.");
         }
+        if (!isset($_GET['file'])) {
+            throw new InvalidRequestParameterException("'file' must be set and is not nullable.");
+        }
     }
 
     public static function validateText(?string $text, ?int $maxNumOfChars = NULL, ?int $maxBytes = NULL): void

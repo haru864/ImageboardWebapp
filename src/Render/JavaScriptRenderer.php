@@ -6,15 +6,12 @@ use Render\Interface\HTTPRenderer;
 
 class JavaScriptRenderer implements HTTPRenderer
 {
-    private int $statusCode;
-    private string $viewFile;
-    private array $data;
+    private int $statusCode = 200;
+    private string $jsFileBasename;
 
-    public function __construct(int $statusCode, string $viewFile, array $data = [])
+    public function __construct(string $jsFileBasename)
     {
-        $this->statusCode = $statusCode;
-        $this->viewFile = $viewFile;
-        $this->data = $data;
+        $this->jsFileBasename = $jsFileBasename;
     }
 
     public function getStatusCode(): int
@@ -31,18 +28,15 @@ class JavaScriptRenderer implements HTTPRenderer
 
     public function getContent(): string
     {
-        $viewPath = $this->getViewPath($this->viewFile);
-        if (!file_exists($viewPath)) {
-            throw new \Exception("View file {$viewPath} does not exist.");
+        $scriptFilePath = $this->getScriptFilePath($this->jsFileBasename);
+        if (!file_exists($scriptFilePath)) {
+            throw new \Exception("JavaScript file '{$scriptFilePath}' does not exist.");
         }
-        ob_start();
-        extract($this->data);
-        require $viewPath;
-        return ob_get_clean();
+        return file_get_contents($scriptFilePath);
     }
 
-    private function getViewPath(string $path): string
+    private function getScriptFilePath(string $jsFileBasename): string
     {
-        return sprintf("%s/%s/Views/%s.php", __DIR__, '..', $path);
+        return sprintf("%s/%s/Views/JavaScript/%s.js", __DIR__, '..', $jsFileBasename);
     }
 }

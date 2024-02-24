@@ -18,13 +18,23 @@ use Logging\LogLevel;
 try {
     date_default_timezone_set('Asia/Tokyo');
     $logger = Logger::getInstance();
-    $logger->log(LogLevel::INFO, 'バッチ処理開始: 期限切れレコードの削除処理を開始します。');
-    $postDAO = new PostDAOImpl();
+    $logger->log(LogLevel::INFO, 'バッチ処理開始: 期限切れスレッドの削除処理を開始します。');
+
     $inactivePeriodHours = (int)Settings::env('INACTIVE_PERIOD_HOURS');
     ValidationHelper::validateInteger($inactivePeriodHours);
-    $postDAO->deleteInactiveThreads($inactivePeriodHours);
-    $logger->log(LogLevel::INFO, 'バッチ処理終了: 期限切れレコードの削除処理が正常に完了しました。');
+
+    $postDAO = new PostDAOImpl();
+    $inactiveThreadColumns = $postDAO->getInactiveThreadIds($inactivePeriodHours);
+    $numOfThreadsToDelete = count($inactiveThreadColumns);
+    $logger->log(LogLevel::INFO, "バッチ処理中: {$numOfThreadsToDelete}件の期限切れスレッドを削除します。");
+    foreach ($inactiveThreadColumns as $inactiveThreadColumn) {
+        $inactiveThreadId = $inactiveThreadColumn['post_id'];
+        $postDAO->delete($inactiveThreadId);
+        $logger->log(LogLevel::INFO, "バッチ処理中: id'{$inactiveThreadId}'のスレッドを削除しました。");
+    }
+
+    $logger->log(LogLevel::INFO, 'バッチ処理終了: 期限切れスレッドの削除処理が正常に完了しました。');
 } catch (Throwable $t) {
-    $logger->log(LogLevel::INFO, 'エラー終了: 期限切れレコードの削除処理中にエラーが発生しました。');
+    $logger->log(LogLevel::INFO, 'エラー終了: 期限切れスレッドの削除処理中にエラーが発生しました。');
     $logger->logError($t);
 }

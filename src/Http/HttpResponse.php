@@ -24,10 +24,7 @@ class HttpResponse
 
     public function setHeaders(array $headers): void
     {
-        foreach ($headers as $header => $value) {
-            $sanitizedValue = $this->sanitize_header_value($value);
-            header("{$header}: {$sanitizedValue}");
-        }
+        $this->headers = $headers;
     }
 
     public function getHeaders(): array

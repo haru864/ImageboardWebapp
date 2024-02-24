@@ -30,6 +30,7 @@ class ReplyService
     public function createReply(int $threadPostId, string $content): void
     {
         ValidationHelper::validateText(text: $content, maxBytes: Settings::env('MAX_TEXT_SIZE_BYTES'));
+        ValidationHelper::validateImage();
         $currentDateTime = date('Y-m-d H:i:s');
         $reply = new Post(
             postId: null,
@@ -54,7 +55,6 @@ class ReplyService
 
     private function updateImage(Post $post): void
     {
-        ValidationHelper::validateImage();
         $storagedFileName = $this->preserveUploadedImageFile($post->getPostId(), $post->getCreatedAt());
         $uploadFileExtension = $_FILES["image"]["type"];
         $post->setImageFileName($storagedFileName);

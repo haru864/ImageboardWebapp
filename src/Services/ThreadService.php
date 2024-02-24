@@ -19,6 +19,7 @@ class ThreadService
 
     public function getThreads(): array
     {
+        include __DIR__ . "/../Batch/DeleteInactiveThreads.php";
         return $this->postDAO->getAllThreads();
     }
 
@@ -31,6 +32,7 @@ class ThreadService
     {
         ValidationHelper::validateText(text: $subject, maxNumOfChars: 50);
         ValidationHelper::validateText(text: $content, maxBytes: Settings::env('MAX_TEXT_SIZE_BYTES'));
+        ValidationHelper::validateImage();
         $currentDateTime = date('Y-m-d H:i:s');
         $newThread = new Post(
             postId: null,
@@ -50,7 +52,6 @@ class ThreadService
 
     private function updateImage(Post $post): void
     {
-        ValidationHelper::validateImage();
         $storagedFileName = $this->preserveUploadedImageFile($post->getPostId(), $post->getCreatedAt());
         $uploadFileExtension = $_FILES["image"]["type"];
         $post->setImageFileName($storagedFileName);

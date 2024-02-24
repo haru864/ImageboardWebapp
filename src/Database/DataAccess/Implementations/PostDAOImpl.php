@@ -100,7 +100,8 @@ class PostDAOImpl implements PostDAO
     public function delete(int $id): bool
     {
         $mysqli = DatabaseManager::getMysqliConnection();
-        return $mysqli->prepareAndExecute("DELETE FROM post WHERE id = ?", 'i', [$id]);
+        $sql = "DELETE FROM post WHERE post_id = ?";
+        return $mysqli->prepareAndExecute($sql, 'i', [$id]);
     }
 
     public function getAllThreads(?int $offset = null, ?int $limit = null): array
@@ -129,22 +130,26 @@ class PostDAOImpl implements PostDAO
         return $this->convertRecordArrayToPostArray($postRecords);
     }
 
-    public function deleteInactiveThreads(int $inactivePeriodHours)
+    public function getInactiveThreadIds(int $inactivePeriodHours): array
     {
         $dateTime = new \DateTime();
         $interval = \DateInterval::createFromDateString("{$inactivePeriodHours} hours");
         $dateTime->add($interval);
         $mysqli = DatabaseManager::getMysqliConnection();
         $sql = <<<SQL
-            DELETE FROM
+            SELECT
+                post_id
+            FROM
                 post
             WHERE
+                reply_to_id IS NULL
+                AND
                 updated_at < ?
         SQL;
-        return $mysqli->prepareAndExecute($sql, 's', [$dateTime->format('Y-m-d H:i:s')]);
+        return $mysqli->prepareAndFetchAll($sql, 's', [$dateTime->format('Y-m-d H:i:s')]);
     }
 
-    private function convertRecordArrayToPostArray(array $records)
+    private function convertRecordArrayToPostArray(array $records): array
     {
         $posts = [];
         foreach ($records as $record) {

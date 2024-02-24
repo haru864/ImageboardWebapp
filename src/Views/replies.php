@@ -12,6 +12,14 @@ $base_url = Settings::env("BASE_URL");
     <meta charset="UTF-8">
     <title>Imageboard Webapp</title>
     <link rel="icon" href="data:,">
+    <style>
+        p,
+        h2,
+        h4 {
+            white-space: normal;
+            word-break: break-all;
+        }
+    </style>
 </head>
 
 <body>

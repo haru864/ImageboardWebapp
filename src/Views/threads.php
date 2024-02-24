@@ -26,6 +26,12 @@ $base_url = Settings::env("BASE_URL");
         textarea {
             resize: vertical;
         }
+
+        p,
+        h2 {
+            white-space: normal;
+            word-break: break-all;
+        }
     </style>
 </head>
 

@@ -133,7 +133,7 @@ class PostDAOImpl implements PostDAO
     public function getInactiveThreadIds(int $inactivePeriodHours): array
     {
         $dateTime = new \DateTime();
-        $interval = \DateInterval::createFromDateString("{$inactivePeriodHours} hours");
+        $interval = \DateInterval::createFromDateString("- {$inactivePeriodHours} hours");
         $dateTime->add($interval);
         $mysqli = DatabaseManager::getMysqliConnection();
         $sql = <<<SQL

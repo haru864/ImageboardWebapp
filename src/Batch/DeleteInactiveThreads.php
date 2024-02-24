@@ -15,6 +15,20 @@ use Validate\ValidationHelper;
 use Logging\Logger;
 use Logging\LogLevel;
 
+function deleteFile(Logger $logger, string $filePath): void
+{
+    if (file_exists($filePath) && is_writable($filePath)) {
+        $logger->log(LogLevel::INFO, "ファイルを削除します。({$filePath})");
+        if (unlink($filePath)) {
+            $logger->log(LogLevel::INFO, "ファイルが正常に削除されました。");
+        } else {
+            $logger->log(LogLevel::INFO, "ファイルの削除に失敗しました。");
+        }
+    } else {
+        $logger->log(LogLevel::INFO, "ファイルが存在しないか、削除できません。");
+    }
+}
+
 try {
     date_default_timezone_set('Asia/Tokyo');
     $logger = Logger::getInstance();
@@ -27,8 +41,14 @@ try {
     $inactiveThreadColumns = $postDAO->getInactiveThreadIds($inactivePeriodHours);
     $numOfThreadsToDelete = count($inactiveThreadColumns);
     $logger->log(LogLevel::INFO, "バッチ処理中: {$numOfThreadsToDelete}件の期限切れスレッドを削除します。");
+
     foreach ($inactiveThreadColumns as $inactiveThreadColumn) {
         $inactiveThreadId = $inactiveThreadColumn['post_id'];
+        $thumbnailDirPath = Settings::env('THUMBNAIL_FILE_LOCATION');
+        $uploadImageDirPath = Settings::env('UPLOADED_IMAGE_FILE_LOCATION');
+        $imageFileName = $postDAO->getById($inactiveThreadId)->getImageFileName();
+        deleteFile($logger, $thumbnailDirPath . '/' . $imageFileName);
+        deleteFile($logger, $uploadImageDirPath . '/' . $imageFileName);
         $postDAO->delete($inactiveThreadId);
         $logger->log(LogLevel::INFO, "バッチ処理中: id'{$inactiveThreadId}'のスレッドを削除しました。");
     }

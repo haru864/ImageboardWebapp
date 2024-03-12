@@ -3,3 +3,4 @@ storage/images/thumbnails/*
 storage/images/uploads/*
 vendor/
 test/data/images/*
+.env

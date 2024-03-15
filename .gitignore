@@ -1,6 +1,4 @@
 log/
-storage/images/thumbnails/*
-storage/images/uploads/*
 vendor/
-test/data/images/*
-.env
+config/.env
+public/images

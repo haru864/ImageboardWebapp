@@ -7,7 +7,7 @@ use Exceptions\InvalidRequestURIException;
 class HttpRequest
 {
     private string $method;
-    private string $uri;
+    private string $uriDirectory;
     private array $pathArray = [];
     private array $queryStringArray = [];
     private array $textParamArray = [];
@@ -15,7 +15,8 @@ class HttpRequest
 
     public function __construct()
     {
-        $this->uri = $_SERVER['REQUEST_URI'];
+        $uri = $_SERVER['REQUEST_URI'];
+        $this->uriDirectory = parse_url($uri, PHP_URL_PATH);
         $pathString = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $pathTrimed = ltrim($pathString, '/');
         $this->pathArray = explode('/', $pathTrimed);
@@ -44,9 +45,9 @@ class HttpRequest
         return $this->method;
     }
 
-    public function getURI(): string
+    public function getUriDir(): string
     {
-        return $this->uri;
+        return $this->uriDirectory;
     }
 
     public function getTextParam(string $paramName): string
@@ -57,17 +58,6 @@ class HttpRequest
     public function getFileParamArray(): array
     {
         return $this->fileParamArray;
-    }
-
-    public function getPostId(): int
-    {
-        $PATTERN_CATCHING_POST_ID = '/^\/threads\/(\d+)\/replies$/';
-        if (preg_match($PATTERN_CATCHING_POST_ID, $this->uri, $matches)) {
-            $postIdString = $matches[1];
-        } else {
-            throw new InvalidRequestURIException('URI for replies must contain post_id.');
-        }
-        return (int)$postIdString;
     }
 
     public function getQueryValue(string $key): string

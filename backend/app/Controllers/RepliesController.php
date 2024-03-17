@@ -5,8 +5,6 @@ namespace Controllers;
 use Controllers\Interface\ControllerInterface;
 use Services\ReplyService;
 use Http\HttpRequest;
-use Render\interface\HTTPRenderer;
-use Render\HTMLRenderer;
 use Render\JSONRenderer;
 use Exceptions\InvalidRequestMethodException;
 use Validate\ValidationHelper;
@@ -22,7 +20,7 @@ class RepliesController implements ControllerInterface
         $this->httpRequest = $httpRequest;
     }
 
-    public function assignProcess(): HTTPRenderer
+    public function assignProcess(): JSONRenderer
     {
         if ($this->httpRequest->getMethod() == 'GET') {
             return $this->getReplies();
@@ -33,21 +31,17 @@ class RepliesController implements ControllerInterface
         }
     }
 
-    public function getReplies(): HTMLRenderer
+    public function getReplies(): JSONRenderer
     {
         ValidationHelper::validateGetRepliesRequest();
-        $postId = $this->httpRequest->getPostId();
-        $threadPost = $this->replyService->getPostById($postId);
-        $replies = $this->replyService->getReplies($threadPost);
-        return new HTMLRenderer(200, 'replies', ['thread' => $threadPost, 'replies' => $replies]);
+        $replies = $this->replyService->getReplies($this->httpRequest);
+        return new JSONRenderer(200, $replies);
     }
 
     public function createReply(): JSONRenderer
     {
         ValidationHelper::validateCreateReplyRequest();
-        $threadPostId = $this->httpRequest->getPostId();
-        $content = $this->httpRequest->getTextParam('content');
-        $this->replyService->createReply($threadPostId, $content);
-        return new JSONRenderer(200, []);
+        $this->replyService->createReply($this->httpRequest);
+        return new JSONRenderer(200, ["result" => "success"]);
     }
 }

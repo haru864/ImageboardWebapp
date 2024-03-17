@@ -5,6 +5,7 @@ namespace Services;
 use Models\Post;
 use Database\DataAccess\Implementations\PostDAOImpl;
 use Exceptions\InvalidMimeTypeException;
+use Http\HttpRequest;
 use Settings\Settings;
 use Validate\ValidationHelper;
 
@@ -22,13 +23,18 @@ class ReplyService
         return $this->postDAO->getById($postId);
     }
 
-    public function getReplies(Post $post): array
+    public function getReplies(HttpRequest $httpRequest): array
     {
-        return $this->postDAO->getReplies($post);
+        $threadPostId = $httpRequest->getQueryValue('id');
+        $thread = $this->postDAO->getById($threadPostId);
+        $replies = $this->postDAO->getReplies($thread);
+        return ["replies" => $replies];
     }
 
-    public function createReply(int $threadPostId, string $content): void
+    public function createReply(HttpRequest $httpRequest): void
     {
+        $threadPostId = $httpRequest->getTextParam('id');
+        $content = $httpRequest->getTextParam('content');
         ValidationHelper::validateText(text: $content, maxBytes: Settings::env('MAX_TEXT_SIZE_BYTES'));
         ValidationHelper::validateImage();
         $currentDateTime = date('Y-m-d H:i:s');

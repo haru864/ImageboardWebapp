@@ -1,0 +1,79 @@
+/api/threads
+> GET
+メインスレッドのリストとスレッドごとの最新5件の返信を表示する。
+<レスポンス>
+Content-Type: application/json
+{
+    "threads": [
+        {
+            "post_id": 123,
+            "reply_to_id": 123,
+            "subject": "XXXXX",
+            "content": "XXXXX",
+            "created_at": "XXXXX",
+            "updated_at": "XXXXX",
+            "image_file_name": "XXXXX",
+            "image_file_extension": "XXXXX",
+            "replies": [
+                {
+                    "post_id": 123,
+                    "reply_to_id": 123,
+                    "subject": "XXXXX",
+                    "content": "XXXXX",
+                    "created_at": "XXXXX",
+                    "updated_at": "XXXXX",
+                    "image_file_name": "XXXXX",
+                    "image_file_extension": "XXXXX",
+                },
+                ...
+            ]
+        },
+        ...
+    ]
+}
+
+> POST
+スレッドを登録する。
+Content-Type: multipart/form-data
+"subject": ユーザー入力文字列
+"content": ユーザー入力文字列
+"image": 画像ファイル(JPEG,PNG,GIF)
+<レスポンス>
+{
+    "result": "success" | "failure",
+    "id": 123
+}
+
+
+/api/replies
+> GET ?id={スレッドID}
+すべての返信を取得する。
+<レスポンス>
+Content-Type: application/json
+{
+    "replies": [
+        {
+            "post_id": 123,
+            "reply_to_id": 123,
+            "subject": "XXXXX",
+            "content": "XXXXX",
+            "created_at": "XXXXX",
+            "updated_at": "XXXXX",
+            "image_file_name": "XXXXX",
+            "image_file_extension": "XXXXX"
+        },
+        ...
+    ]
+}
+
+> POST
+リプライを登録する。
+Content-Type: multipart/form-data
+"id": スレッドID
+"content": ユーザー入力文字列
+"image": 画像ファイル(JPEG,PNG,GIF)
+<レスポンス>
+{
+    "result": "success" | "failure"
+}
+

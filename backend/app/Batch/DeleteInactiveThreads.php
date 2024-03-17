@@ -44,13 +44,14 @@ try {
 
     foreach ($inactiveThreadColumns as $inactiveThreadColumn) {
         $inactiveThreadId = $inactiveThreadColumn['post_id'];
+        $logger->log(LogLevel::INFO, "バッチ処理中: スレッド削除を開始 id'{$inactiveThreadId}'");
         $thumbnailDirPath = Settings::env('THUMBNAIL_FILE_LOCATION');
         $uploadImageDirPath = Settings::env('UPLOADED_IMAGE_FILE_LOCATION');
         $imageFileName = $postDAO->getById($inactiveThreadId)->getImageFileName();
         deleteFile($logger, $thumbnailDirPath . '/' . $imageFileName);
         deleteFile($logger, $uploadImageDirPath . '/' . $imageFileName);
         $postDAO->delete($inactiveThreadId);
-        $logger->log(LogLevel::INFO, "バッチ処理中: id'{$inactiveThreadId}'のスレッドを削除しました。");
+        $logger->log(LogLevel::INFO, "バッチ処理中: スレッド削除を完了 id'{$inactiveThreadId}'");
     }
 
     $logger->log(LogLevel::INFO, 'バッチ処理終了: 期限切れスレッドの削除処理が正常に完了しました。');

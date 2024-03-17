@@ -16,7 +16,7 @@ use Logging\Logger;
 use Http\HttpRequest;
 use Http\HttpResponse;
 use Exceptions\Interface\UserVisibleException;
-use Render\HTMLRenderer;
+use Render\JSONRenderer;
 use Settings\Settings;
 
 try {
@@ -27,35 +27,37 @@ try {
     $routes = include($APP_DIRECTORY . 'Routing/routes.php');
     $renderer = null;
     foreach ($routes as $uriPattern => $controller) {
-        if (preg_match($uriPattern, $httpRequest->getURI())) {
+        if (preg_match($uriPattern, $httpRequest->getUriDir())) {
             $renderer = $controller->assignProcess();
         }
     }
     if (is_null($renderer)) {
-        $htmlElems = [
+        $param = [
+            "result" => "failure",
             'title' => '404 Not Found',
             'headline' => '404 Not Found',
             'message' => 'There is no content associated with the specified URL.'
         ];
-        $httpResponse = new HttpResponse(new HTMLRenderer(404, 'error', $htmlElems));
-    } else {
-        $httpResponse = new HttpResponse($renderer);
+        $renderer = new JSONRenderer(404, $param);
     }
+    $httpResponse = new HttpResponse($renderer);
 } catch (UserVisibleException $e) {
-    $htmlElems = [
+    $param = [
+        "result" => "failure",
         'title' => '400 Bad Request',
         'headline' => '400 Bad Request',
         'message' => $e->displayErrorMessage()
     ];
-    $httpResponse = new HttpResponse(new HTMLRenderer(400, 'error', $htmlElems));
+    $httpResponse = new HttpResponse(new JSONRenderer(400, $param));
     $logger->logError($e);
 } catch (Throwable $e) {
-    $htmlElems = [
+    $param = [
+        "result" => "failure",
         'title' => '500 Internal Server Error',
         'headline' => '500 Internal Server Error',
         'message' => 'Internal error, please contact the admin.'
     ];
-    $httpResponse = new HttpResponse(new HTMLRenderer(500, 'error', $htmlElems));
+    $httpResponse = new HttpResponse(new JSONRenderer(500, $param));
     $logger->logError($e);
 } finally {
     $httpResponse->send();

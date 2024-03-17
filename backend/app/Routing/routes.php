@@ -14,12 +14,10 @@ $threadsController = new ThreadsController($threadService, $httpRequest);
 $replyService = new ReplyService($postDAO);
 $replyController = new RepliesController($replyService, $httpRequest);
 
-$URL_PATTERN_FOR_HOME = '/^\/$/';
-$URL_PATTERN_FOR_THREADS_API = '/^\/threads$/';
-$URL_PATTERN_FOR_REPLIES_API = '/^\/threads\/\d+\/replies$/';
+$URL_PATTERN_FOR_THREADS_API = '/^\/api\/threads$/';
+$URL_PATTERN_FOR_REPLIES_API = '/^\/api\/replies$/';
 
 return [
-    $URL_PATTERN_FOR_HOME => $threadsController,
     $URL_PATTERN_FOR_THREADS_API => $threadsController,
     $URL_PATTERN_FOR_REPLIES_API => $replyController
 ];

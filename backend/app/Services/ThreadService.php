@@ -5,11 +5,13 @@ namespace Services;
 use Models\Post;
 use Database\DataAccess\Implementations\PostDAOImpl;
 use Exceptions\InvalidMimeTypeException;
+use Http\HttpRequest;
 use Settings\Settings;
 use Validate\ValidationHelper;
 
 class ThreadService
 {
+    private int $REPLIES_PREVIEW_COUNT = 5;
     private PostDAOImpl $postDAO;
 
     public function __construct(PostDAOImpl $postDAO)
@@ -20,16 +22,21 @@ class ThreadService
     public function getThreads(): array
     {
         include __DIR__ . "/../Batch/DeleteInactiveThreads.php";
-        return $this->postDAO->getAllThreads();
+        $threads = $this->postDAO->getAllThreads();
+        $threadsWithReplies = ["threads" => []];
+        foreach ($threads as $thread) {
+            $threadMap = $thread->toArray();
+            $latestReplies = $this->postDAO->getReplies($thread, 0, $this->REPLIES_PREVIEW_COUNT);
+            $threadMap["replies"] = $latestReplies;
+            array_push($threadsWithReplies["threads"], $threadMap);
+        }
+        return $threadsWithReplies;
     }
 
-    public function getReplies(Post $post, int $maxNumOfReplies): array
+    public function createThread(HttpRequest $httpRequest): int
     {
-        return $this->postDAO->getReplies($post, 0, $maxNumOfReplies);
-    }
-
-    public function createThread(string $subject, string $content): int
-    {
+        $subject = $httpRequest->getTextParam('subject');
+        $content = $httpRequest->getTextParam('content');
         ValidationHelper::validateText(text: $subject, maxNumOfChars: 50);
         ValidationHelper::validateText(text: $content, maxBytes: Settings::env('MAX_TEXT_SIZE_BYTES'));
         ValidationHelper::validateImage();

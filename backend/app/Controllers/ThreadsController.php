@@ -5,16 +5,12 @@ namespace Controllers;
 use Controllers\Interface\ControllerInterface;
 use Services\ThreadService;
 use Http\HttpRequest;
-use Render\interface\HTTPRenderer;
-use Render\HTMLRenderer;
-use Render\RedirectRenderer;
+use Render\JSONRenderer;
 use Exceptions\InvalidRequestMethodException;
 use Validate\ValidationHelper;
-use Settings\Settings;
 
 class ThreadsController implements ControllerInterface
 {
-    private static int $REPLIES_PREVIEW_COUNT = 5;
     private ThreadService $threadService;
     private HttpRequest $httpRequest;
 
@@ -24,7 +20,7 @@ class ThreadsController implements ControllerInterface
         $this->httpRequest = $httpRequest;
     }
 
-    public function assignProcess(): HTTPRenderer
+    public function assignProcess(): JSONRenderer
     {
         if ($this->httpRequest->getMethod() == 'GET') {
             return $this->getThreads();
@@ -35,26 +31,17 @@ class ThreadsController implements ControllerInterface
         }
     }
 
-    private function getThreads(): HTMLRenderer
+    private function getThreads(): JSONRenderer
     {
         ValidationHelper::validateGetThreadsRequest();
-        $threads = $this->threadService->getThreads();
-        $replyMap = [];
-        foreach ($threads as $thread) {
-            $replies = $this->threadService->getReplies($thread, ThreadsController::$REPLIES_PREVIEW_COUNT);
-            $replyMap[$thread->getPostId()] = $replies;
-        }
-        return new HTMLRenderer(200, 'threads', ['threads' => $threads, 'replyMap' => $replyMap]);
+        $threadsWithReplies = $this->threadService->getThreads();
+        return new JSONRenderer(200, $threadsWithReplies);
     }
 
-    private function createThread(): RedirectRenderer
+    private function createThread(): JSONRenderer
     {
         ValidationHelper::validateCreateThreadRequest();
-        $subject = $this->httpRequest->getTextParam('subject');
-        $content = $this->httpRequest->getTextParam('content');
-        $postId = $this->threadService->createThread($subject, $content);
-        $baseURL = Settings::env('BASE_URL');
-        $redirectURL = $baseURL . '/threads/' . $postId . '/replies';
-        return new RedirectRenderer($redirectURL, ['status' => 'success']);
+        $postId = $this->threadService->createThread($this->httpRequest);
+        return new JSONRenderer(200, ['status' => 'success', 'id' => $postId]);
     }
 }

@@ -65,32 +65,6 @@ class ValidationHelper
         }
     }
 
-    public static function validateGetImage(): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-            throw new InvalidRequestMethodException("Valid method is 'GET', but " . $_SERVER['REQUEST_METHOD'] . " given.");
-        }
-        $nonNullableParams = ['id', 'type'];
-        foreach ($nonNullableParams as $param) {
-            if (!isset($_GET[$param])) {
-                throw new InvalidRequestParameterException("'{$param}' must be set and is not nullable.");
-            }
-        }
-        if ($_GET['type'] !== 'thumbnail' && $_GET['type'] !== 'original') {
-            throw new InvalidRequestParameterException("'{$param}' must be 'thumbnail' or 'original'.");
-        }
-    }
-
-    public static function validateGetJavaScript(): void
-    {
-        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
-            throw new InvalidRequestMethodException("Valid method is 'GET', but " . $_SERVER['REQUEST_METHOD'] . " given.");
-        }
-        if (!isset($_GET['file'])) {
-            throw new InvalidRequestParameterException("'file' must be set and is not nullable.");
-        }
-    }
-
     public static function validateText(?string $text, ?int $maxNumOfChars = NULL, ?int $maxBytes = NULL): void
     {
         if (!is_string($text)) {

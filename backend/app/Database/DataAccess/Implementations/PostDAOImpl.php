@@ -138,7 +138,7 @@ class PostDAOImpl implements PostDAO
         $mysqli = DatabaseManager::getMysqliConnection();
         $sql = <<<SQL
             SELECT
-                post_id
+                *
             FROM
                 post
             WHERE
@@ -146,7 +146,8 @@ class PostDAOImpl implements PostDAO
                 AND
                 updated_at < ?
         SQL;
-        return $mysqli->prepareAndFetchAll($sql, 's', [$dateTime->format('Y-m-d H:i:s')]);
+        $inactiveThreads = $mysqli->prepareAndFetchAll($sql, 's', [$dateTime->format('Y-m-d H:i:s')]);
+        return $this->convertRecordArrayToPostArray($inactiveThreads);
     }
 
     private function convertRecordArrayToPostArray(array $records): array

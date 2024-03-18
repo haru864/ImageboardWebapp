@@ -29,6 +29,7 @@ class JSONRenderer implements HTTPRenderer
     {
         return [
             'Content-Type' => 'application/json; charset=UTF-8',
+            'Access-Control-Allow-Origin' => '*'
         ];
     }
 

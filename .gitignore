@@ -2,6 +2,8 @@ backend/log/
 backend/vendor/
 backend/config/.env
 backend/public/images
-frontend/node_modules/
 backend/public/images/thumbnails/*
 backend/public/images/uploads/*
+
+frontend/.next
+frontend/node_modules/

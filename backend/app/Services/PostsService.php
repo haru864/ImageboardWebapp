@@ -4,6 +4,7 @@ namespace Services;
 
 use Models\Post;
 use Database\DataAccess\Implementations\PostDAOImpl;
+use Exceptions\InternalServerException;
 use Exceptions\InvalidMimeTypeException;
 use Http\HttpRequest;
 use Settings\Settings;
@@ -33,36 +34,95 @@ class PostsService
         return $threadsWithReplies;
     }
 
-    public function getReplies(Post $thread): array
+    public function getReplies(HttpRequest $httpRequest): array
     {
+        $threadPostId = $httpRequest->getQueryValue('id');
+        $thread = $this->postDAO->getById($threadPostId);
+        if (is_null($thread)) {
+            return ["replies" => []];
+        }
+        $replies = $this->postDAO->getReplies($thread);
+        return ["replies" => $replies];
     }
 
-    public function registerThread(HttpRequest $httpRequest): Post
+    public function registerThread(HttpRequest $httpRequest): int
     {
         $subject = $httpRequest->getTextParam('subject');
         $content = $httpRequest->getTextParam('content');
         ValidationHelper::validateText(text: $subject, maxNumOfChars: 50);
         ValidationHelper::validateText(text: $content, maxBytes: Settings::env('MAX_TEXT_SIZE_BYTES'));
         ValidationHelper::validateImage();
+
         $currentDateTime = date('Y-m-d H:i:s');
-        $newThread = new Post(
-            postId: null,
+        $uploadFileName = basename($_FILES["image"]["name"]);
+        $stringToHash = $currentDateTime . $uploadFileName;
+        $hashedFileName = $this->generateUniqueHashWithLimit($stringToHash);
+
+        $postId = $this->registerPost(
             replyToId: null,
             subject: $subject,
             content: $content,
             createdAt: $currentDateTime,
             updatedAt: $currentDateTime,
-            imageFileName: null,
-            imageFileExtension: null
+            imageFileName: $hashedFileName,
+            imageFileExtension: $_FILES["image"]["type"]
         );
-        $postId = $this->postDAO->create($newThread);
-        $newThread->setPostId($postId);
-        $this->updateImage($newThread);
         return $postId;
     }
 
-    public function registerReply(HttpRequest $httpRequest): Post
+    public function registerReply(HttpRequest $httpRequest): int
     {
+        $threadPostId = $httpRequest->getTextParam('id');
+        $content = $httpRequest->getTextParam('content');
+        ValidationHelper::validateText(text: $content, maxBytes: Settings::env('MAX_TEXT_SIZE_BYTES'));
+        ValidationHelper::validateImage();
+
+        $currentDateTime = date('Y-m-d H:i:s');
+        $uploadFileName = basename($_FILES["image"]["name"]);
+        $stringToHash = $currentDateTime . $uploadFileName;
+        $hashedFileName = $this->generateUniqueHashWithLimit($stringToHash);
+
+        $postId = $this->registerPost(
+            replyToId: $threadPostId,
+            subject: null,
+            content: $content,
+            createdAt: $currentDateTime,
+            updatedAt: $currentDateTime,
+            imageFileName: $hashedFileName,
+            imageFileExtension: $_FILES["image"]["type"]
+        );
+
+        $thread = $this->postDAO->getById($threadPostId);
+        $dateTime = new \DateTime();
+        $thread->setUpdatedAt($dateTime->format('Y-m-d H:i:s'));
+        $this->postDAO->update($thread);
+        return $postId;
+    }
+
+    private function registerPost(
+        ?int $replyToId,
+        ?string $subject,
+        ?string $content,
+        ?string $createdAt,
+        ?string $updatedAt,
+        ?string $imageFileName,
+        ?string $imageFileExtension
+    ): int {
+        // DB登録に失敗した場合に画像だけ作成されないようにするため、
+        // INSERT成功後に画像ファイルを作成する。
+        $reply = new Post(
+            postId: null,
+            replyToId: $replyToId,
+            subject: $subject,
+            content: $content,
+            createdAt: $createdAt,
+            updatedAt: $updatedAt,
+            imageFileName: $imageFileName,
+            imageFileExtension: $imageFileExtension
+        );
+        $postId = $this->postDAO->create($reply);
+        $this->preserveUploadedImageFile($imageFileName);
+        return $postId;
     }
 
     private function generateUniqueHashWithLimit(string $data, $limit = 100): string
@@ -70,8 +130,8 @@ class PostsService
         $hash = hash('sha256', $data);
         $counter = 0;
         while ($counter < $limit) {
-            $registeredSnippet = DatabaseHelper::selectViewCount($hash);
-            if (is_null($registeredSnippet)) {
+            $iamgeFileNames = $this->postDAO->getAllImageFileName();
+            if (!in_array($hash, $iamgeFileNames)) {
                 return $hash;
             }
             $counter++;
@@ -80,22 +140,9 @@ class PostsService
         throw new InternalServerException('Failed to generate unique hash value.');
     }
 
-    private function updateImage(Post $post): void
+    private function preserveUploadedImageFile(string $newFileBasename): void
     {
-        $storagedFileName = $this->preserveUploadedImageFile($post->getPostId(), $post->getCreatedAt());
-        $uploadFileExtension = $_FILES["image"]["type"];
-        $post->setImageFileName($storagedFileName);
-        $post->setImageFileExtension($uploadFileExtension);
-        $this->postDAO->update($post);
-        return;
-    }
-
-    private function preserveUploadedImageFile(int $postId, string $createdAt): string
-    {
-        $uploadFileName = basename($_FILES["image"]["name"]);
-        $stringToHash = $postId . $createdAt . $uploadFileName;
-        $hashedFileName = hash('sha256', $stringToHash);
-        $storagedFilePath = Settings::env('UPLOADED_IMAGE_FILE_LOCATION') . '/' . $hashedFileName;
+        $storagedFilePath = Settings::env('UPLOADED_IMAGE_FILE_LOCATION') . '/' . $newFileBasename;
         $check = getimagesize($_FILES["image"]["tmp_name"]);
         if ($check !== false) {
             move_uploaded_file($_FILES["image"]["tmp_name"], $storagedFilePath);
@@ -103,10 +150,10 @@ class PostsService
             throw new InvalidMimeTypeException('Uploaded file was not image-file.');
         }
         $this->createThumbnail($storagedFilePath);
-        return $hashedFileName;
+        return;
     }
 
-    private function createThumbnail(string $imageFilePath, int $thumbWidth = 150): string
+    private function createThumbnail(string $imageFilePath, int $thumbWidth = 150): void
     {
         $image = new \Imagick($imageFilePath);
         $width = $image->getImageWidth();
@@ -118,6 +165,6 @@ class PostsService
         $image->writeImage($thumbnailFile);
         $image->clear();
         $image->destroy();
-        return $thumbnailFile;
+        return;
     }
 }

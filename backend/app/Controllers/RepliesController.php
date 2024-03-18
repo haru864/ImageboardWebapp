@@ -3,7 +3,7 @@
 namespace Controllers;
 
 use Controllers\Interface\ControllerInterface;
-use Services\ReplyService;
+use Services\PostsService;
 use Http\HttpRequest;
 use Render\JSONRenderer;
 use Exceptions\InvalidRequestMethodException;
@@ -11,12 +11,12 @@ use Validate\ValidationHelper;
 
 class RepliesController implements ControllerInterface
 {
-    private ReplyService $replyService;
+    private PostsService $postService;
     private HttpRequest $httpRequest;
 
-    public function __construct(ReplyService $replyService, HttpRequest $httpRequest)
+    public function __construct(PostsService $postService, HttpRequest $httpRequest)
     {
-        $this->replyService = $replyService;
+        $this->postService = $postService;
         $this->httpRequest = $httpRequest;
     }
 
@@ -34,14 +34,14 @@ class RepliesController implements ControllerInterface
     public function getReplies(): JSONRenderer
     {
         ValidationHelper::validateGetRepliesRequest();
-        $replies = $this->replyService->getReplies($this->httpRequest);
+        $replies = $this->postService->getReplies($this->httpRequest);
         return new JSONRenderer(200, $replies);
     }
 
     public function createReply(): JSONRenderer
     {
         ValidationHelper::validateCreateReplyRequest();
-        $this->replyService->createReply($this->httpRequest);
-        return new JSONRenderer(200, ["result" => "success"]);
+        $postId = $this->postService->registerReply($this->httpRequest);
+        return new JSONRenderer(200, ['status' => 'success', 'id' => $postId]);
     }
 }

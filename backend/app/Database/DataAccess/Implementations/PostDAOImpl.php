@@ -150,6 +150,14 @@ class PostDAOImpl implements PostDAO
         return $this->convertRecordArrayToPostArray($inactiveThreads);
     }
 
+    public function getAllImageFileName(): ?array
+    {
+        $mysqli = DatabaseManager::getMysqliConnection();
+        $sql = "SELECT image_file_name FROM post";
+        $imageFileNames = $mysqli->prepareAndFetchAll($sql, '', []);
+        return $imageFileNames;
+    }
+
     private function convertRecordArrayToPostArray(array $records): array
     {
         $posts = [];

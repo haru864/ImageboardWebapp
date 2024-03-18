@@ -3,20 +3,20 @@
 namespace Controllers;
 
 use Controllers\Interface\ControllerInterface;
-use Services\ThreadService;
 use Http\HttpRequest;
 use Render\JSONRenderer;
 use Exceptions\InvalidRequestMethodException;
+use Services\PostsService;
 use Validate\ValidationHelper;
 
 class ThreadsController implements ControllerInterface
 {
-    private ThreadService $threadService;
+    private PostsService $postService;
     private HttpRequest $httpRequest;
 
-    public function __construct(ThreadService $threadService, HttpRequest $httpRequest)
+    public function __construct(PostsService $postService, HttpRequest $httpRequest)
     {
-        $this->threadService = $threadService;
+        $this->postService = $postService;
         $this->httpRequest = $httpRequest;
     }
 
@@ -34,14 +34,14 @@ class ThreadsController implements ControllerInterface
     private function getThreads(): JSONRenderer
     {
         ValidationHelper::validateGetThreadsRequest();
-        $threadsWithReplies = $this->threadService->getThreads();
+        $threadsWithReplies = $this->postService->getAllThreads();
         return new JSONRenderer(200, $threadsWithReplies);
     }
 
     private function createThread(): JSONRenderer
     {
         ValidationHelper::validateCreateThreadRequest();
-        $postId = $this->threadService->createThread($this->httpRequest);
+        $postId = $this->postService->registerThread($this->httpRequest);
         return new JSONRenderer(200, ['status' => 'success', 'id' => $postId]);
     }
 }

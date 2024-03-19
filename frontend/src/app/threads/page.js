@@ -1,12 +1,9 @@
 "use client"
 
 import { validateSubject, validateContent, validateFile } from '../validation'
-import React from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, TextField, Typography, Card, CardContent, CardMedia } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import Typography from '@mui/material/Typography'
 
 async function handleSubmit() {
   try {
@@ -26,7 +23,7 @@ async function handleSubmit() {
       formData.append('image', file);
     }
 
-    const response = await fetch('http://localhost:8000/api/threads', {
+    const response = await fetch('http://imageboard.test.com/api/threads', {
       method: 'POST',
       body: formData,
     });
@@ -38,7 +35,7 @@ async function handleSubmit() {
     console.log('リクエスト成功:', response);
     const data = await response.json();
     const threadId = data.id;
-    window.location.href = `http://localhost:3000/replies?id=${threadId}`;
+    window.location.href = `http://imageboard.test.com/replies?id=${threadId}`;
 
   } catch (error) {
     console.error('エラーが発生しました:', error);
@@ -46,50 +43,103 @@ async function handleSubmit() {
   }
 }
 
-function Threads() {
+const renderImage = (fileName) => {
+  if (!fileName) {
+    return null;
+  }
+  const imageUrl = `http://imageboard.test.com/images/thumbnails/${fileName}`;
+  return <img src={imageUrl} alt="" style={{ maxWidth: '100%', height: 'auto' }} />;
+};
+
+function ThreadsDisplay() {
+  const [threads, setThreads] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch('http://imageboard.test.com/api/threads');
+      const data = await response.json();
+      setThreads(data.threads);
+    };
+    fetchData();
+  }, []);
   return (
     <Box
+      component="main"
       sx={{
-        bgcolor: 'background.paper',
-        height: '100vh',
+        backgroundColor: 'lightblue',
+        overflow: 'auto',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '16px',
+        justifyContent: 'space-between',
+        padding: '20px 0'
       }}
     >
-      <Typography variant="h4">スレッドを作成する</Typography>
-      <TextField
-        required
-        id="subject"
-        label="Subject（50文字まで）"
-        defaultValue=""
-        variant="outlined"
-        sx={{ width: '50ch' }}
-      />
-      <TextField
-        required
-        id="content"
-        label="Content（300文字まで）"
-        defaultValue=""
-        variant="outlined"
-        multiline
-        rows={3}
-        rowsmax={6}
-        sx={{ width: '50ch' }}
-      />
-      <Button
-        component="label"
-        variant="contained"
-        startIcon={<CloudUploadIcon />}
+      <Box sx={{ margin: 2 }} label="thread-list">
+        {threads.map((thread) => (
+          <Card key={thread.postId} sx={{ marginBottom: 2 }}>
+            <CardContent>
+              <Typography variant="h5" sx={{ marginBottom: 2 }}>{thread.subject}</Typography>
+              <Box display="flex" flexDirection="row" alignItems="center">
+                {renderImage(thread.imageFileName)}
+                <Typography variant="body1" sx={{ marginLeft: 2 }}>{thread.content}</Typography>
+              </Box>
+              {thread.replies.map((reply) => (
+                <Card key={reply.postId} sx={{ marginTop: 2, marginLeft: 4 }}>
+                  <CardContent>
+                    <Box display="flex" flexDirection="row" alignItems="center">
+                      {renderImage(reply.imageFileName)}
+                      <Typography variant="body2" sx={{ marginLeft: 2 }}>{reply.content}</Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          </Card>
+        ))}
+      </Box>
+      <Card
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          padding: '20px',
+          margin: 2
+        }}
+        label="input"
       >
-        Upload Image
-        <input type="file" hidden />
-      </Button>
-      <Button variant="contained" onClick={handleSubmit}>create</Button>
+        <Typography variant="h4" sx={{ marginBottom: 1 }}>スレッドを作成する</Typography>
+        <TextField
+          required
+          id="subject"
+          label="Subject（50文字まで）"
+          defaultValue=""
+          variant="outlined"
+          sx={{ width: '50ch', marginBottom: 1 }}
+        />
+        <TextField
+          required
+          id="content"
+          label="Content（300文字まで）"
+          defaultValue=""
+          variant="outlined"
+          multiline
+          rows={3}
+          rowsmax={6}
+          sx={{ width: '50ch', marginBottom: 1 }}
+        />
+        <Button
+          component="label"
+          variant="contained"
+          startIcon={<CloudUploadIcon />}
+          sx={{ marginBottom: 1 }}
+        >
+          Upload Image
+          <input type="file" hidden />
+        </Button>
+        <Button variant="contained" onClick={handleSubmit}>create</Button>
+      </Card >
     </Box>
   );
 }
 
-export default Threads;
+export default ThreadsDisplay;

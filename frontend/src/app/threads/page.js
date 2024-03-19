@@ -30,18 +30,23 @@ async function handleSubmit() {
       method: 'POST',
       body: formData,
     });
-    if (response.ok) {
-      console.log('リクエスト成功:', response);
-    } else {
+    if (!response.ok) {
       console.error('リクエスト失敗:', response);
+      return;
     }
+
+    console.log('リクエスト成功:', response);
+    const data = await response.json();
+    const threadId = data.id;
+    window.location.href = `http://localhost:3000/replies?id=${threadId}`;
 
   } catch (error) {
     console.error('エラーが発生しました:', error);
+    alert(error);
   }
 }
 
-function MyApp() {
+function Threads() {
   return (
     <Box
       sx={{
@@ -87,4 +92,4 @@ function MyApp() {
   );
 }
 
-export default MyApp;
+export default Threads;

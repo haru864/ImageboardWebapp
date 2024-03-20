@@ -22,7 +22,7 @@ async function handleSubmit(threadId) {
             formData.append('image', file);
         }
 
-        const response = await fetch(`${process.env.domain}/api/replies`, {
+        const response = await fetch(`${process.env.apiDomain}/api/replies`, {
             method: 'POST',
             body: formData,
         });
@@ -43,8 +43,8 @@ const renderImage = (fileName) => {
     if (!fileName) {
         return null;
     }
-    const thumbnailUrl = `${process.env.domain}/images/thumbnails/${fileName}`;
-    const imageUrl = `${process.env.domain}/images/uploads/${fileName}`;
+    const thumbnailUrl = `${process.env.apiDomain}/images/thumbnails/${fileName}`;
+    const imageUrl = `${process.env.apiDomain}/images/uploads/${fileName}`;
     return (
         <Link href={imageUrl}>
             <img src={thumbnailUrl} alt="" style={{ maxWidth: '100%', height: 'auto' }} />
@@ -64,7 +64,7 @@ function Replies() {
         const id = urlParams.get('id');
         setThreadId(id);
         const fetchData = async () => {
-            const response = await fetch(`${process.env.domain}/api/replies?id=${id}`);
+            const response = await fetch(`${process.env.apiDomain}/api/replies?id=${id}`);
             const data = await response.json();
             setThread(data.thread);
             setReplies(data.replies);
@@ -94,7 +94,7 @@ function Replies() {
             }}
         >
             <Box>
-                <Link href="/threads">
+                <Link href={`${process.env.frontDomain}/threads`}>
                     <Button variant="contained" color="primary" sx={{ marginLeft: 2 }}>
                         スレッド一覧へ
                     </Button>
@@ -109,14 +109,38 @@ function Replies() {
                         <Typography variant="h5" sx={{ marginBottom: 2 }}>{thread.subject}</Typography>
                         <Box display="flex" flexDirection="row" alignItems="center">
                             {renderImage(thread.imageFileName)}
-                            <Typography variant="body1" sx={{ marginLeft: 2 }}>{thread.content}</Typography>
+                            <Typography
+                                variant="body1"
+                                sx={{
+                                    marginLeft: 2,
+                                    flexGrow: 1,
+                                    minWidth: 0,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    wordWrap: 'break-word'
+                                }}
+                            >
+                                {thread.content}
+                            </Typography>
                         </Box>
                         {replies.map((reply) => (
                             <Card key={reply.postId} sx={{ marginTop: 2, marginLeft: 4 }}>
                                 <CardContent>
                                     <Box display="flex" flexDirection="row" alignItems="center">
                                         {renderImage(reply.imageFileName)}
-                                        <Typography variant="body2" sx={{ marginLeft: 2 }}>{reply.content}</Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                marginLeft: 2,
+                                                flexGrow: 1,
+                                                minWidth: 0,
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                wordWrap: 'break-word'
+                                            }}
+                                        >
+                                            {reply.content}
+                                        </Typography>
                                     </Box>
                                 </CardContent>
                             </Card>

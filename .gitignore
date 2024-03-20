@@ -4,6 +4,8 @@ backend/config/.env
 backend/public/images
 backend/public/images/thumbnails/*
 backend/public/images/uploads/*
+backend/public/nextjs/
 
-frontend/.next
+frontend/.next/
+frontend/out/
 frontend/node_modules/

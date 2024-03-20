@@ -6,6 +6,7 @@ use Models\Post;
 use Database\DataAccess\Implementations\PostDAOImpl;
 use Exceptions\InternalServerException;
 use Exceptions\InvalidMimeTypeException;
+use Exceptions\InvalidRequestParameterException;
 use Http\HttpRequest;
 use Settings\Settings;
 use Validate\ValidationHelper;
@@ -50,13 +51,14 @@ class PostsService
         $subject = $httpRequest->getTextParam('subject');
         $content = $httpRequest->getTextParam('content');
         ValidationHelper::validateText(text: $subject, maxNumOfChars: 50);
-        ValidationHelper::validateText(text: $content, maxBytes: Settings::env('MAX_TEXT_SIZE_BYTES'));
+        ValidationHelper::validateText(text: $content, maxNumOfChars: 300);
         ValidationHelper::validateImage();
 
         $currentDateTime = date('Y-m-d H:i:s');
         $uploadFileName = basename($_FILES["image"]["name"]);
         $stringToHash = $currentDateTime . $uploadFileName;
         $hashedFileName = $this->generateUniqueHashWithLimit($stringToHash);
+        $hashedFileName .= '.' . $this->getFileExtension();
 
         $postId = $this->registerPost(
             replyToId: null,
@@ -74,13 +76,14 @@ class PostsService
     {
         $threadPostId = $httpRequest->getTextParam('id');
         $content = $httpRequest->getTextParam('content');
-        ValidationHelper::validateText(text: $content, maxBytes: Settings::env('MAX_TEXT_SIZE_BYTES'));
+        ValidationHelper::validateText(text: $content, maxNumOfChars: 300);
         ValidationHelper::validateImage();
 
         $currentDateTime = date('Y-m-d H:i:s');
         $uploadFileName = basename($_FILES["image"]["name"]);
         $stringToHash = $currentDateTime . $uploadFileName;
         $hashedFileName = $this->generateUniqueHashWithLimit($stringToHash);
+        $hashedFileName .= '.' . $this->getFileExtension();
 
         $postId = $this->registerPost(
             replyToId: $threadPostId,
@@ -166,5 +169,16 @@ class PostsService
         $image->clear();
         $image->destroy();
         return;
+    }
+
+    private function getFileExtension(): string
+    {
+        if (isset($_FILES['image']['name'])) {
+            $filename = $_FILES['image']['name'];
+            $fileInfo = pathinfo($filename);
+            $extension = $fileInfo['extension'];
+            return $extension;
+        }
+        throw new InvalidRequestParameterException('No file in request parameter.');
     }
 }

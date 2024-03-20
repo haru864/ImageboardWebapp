@@ -1,5 +1,5 @@
 ＃ マイグレーションコマンド
-php console.php code-gen migration --name CreatePost
+php console.php code-gen migration --name ＜ファイル名＞
 php console.php migrate --init
 php console.php migrate
 

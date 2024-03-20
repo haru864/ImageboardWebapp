@@ -1,32 +1,29 @@
 server {
     listen 80;
     server_name imageboard.test.com;
-    root /var/www/ImageboardWebapp/public;
+    root /var/www/ImageboardWebapp/backend/public;
 
-    index index.php;
+    index php/index.php;
 
-    disable_symlinks off;
+    location = / {
+        return 302 http://imageboard.test.com/nextjs/threads.html;
+    }
 
-    #location / {
-    #    try_files $uri $uri/ =404;
-    #}
+    location = /threads {
+        try_files /nextjs/threads.html =404;
+    }
+
+    location ^~ /replies {
+        try_files /nextjs/replies.html =404;
+    }
+
+    location ~ ^/api/ {
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME /var/www/ImageboardWebapp/backend/public/php/index.php;
+        include fastcgi_params;
+    }
 
     location / {
-        try_files $uri $uri/ @rewrites;
-    }
-
-    location @rewrites {
-        rewrite ^(.*)$ /index.php last;
-    }
-
-    location ~* \.(css|js|jpg|jpeg|png|gif|ico)$ {
-        try_files $uri =404;
-    }
-
-    location ~ \.php$ {
-        # include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        include fastcgi_params;
+        try_files $uri $uri/ =404;
     }
 }

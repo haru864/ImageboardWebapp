@@ -22,7 +22,7 @@ async function handleSubmit(threadId) {
             formData.append('image', file);
         }
 
-        const response = await fetch('http://imageboard.test.com/api/replies', {
+        const response = await fetch(`${process.env.domain}/api/replies`, {
             method: 'POST',
             body: formData,
         });
@@ -43,8 +43,8 @@ const renderImage = (fileName) => {
     if (!fileName) {
         return null;
     }
-    const thumbnailUrl = `http://imageboard.test.com/images/thumbnails/${fileName}`;
-    const imageUrl = `http://imageboard.test.com/images/uploads/${fileName}`;
+    const thumbnailUrl = `${process.env.domain}/images/thumbnails/${fileName}`;
+    const imageUrl = `${process.env.domain}/images/uploads/${fileName}`;
     return (
         <Link href={imageUrl}>
             <img src={thumbnailUrl} alt="" style={{ maxWidth: '100%', height: 'auto' }} />
@@ -64,7 +64,7 @@ function Replies() {
         const id = urlParams.get('id');
         setThreadId(id);
         const fetchData = async () => {
-            const response = await fetch(`http://imageboard.test.com/api/replies?id=${id}`);
+            const response = await fetch(`${process.env.domain}/api/replies?id=${id}`);
             const data = await response.json();
             setThread(data.thread);
             setReplies(data.replies);

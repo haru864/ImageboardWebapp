@@ -23,7 +23,7 @@ async function handleSubmit() {
       formData.append('image', file);
     }
 
-    const response = await fetch('http://imageboard.test.com/api/threads', {
+    const response = await fetch(`${process.env.domain}/api/threads`, {
       method: 'POST',
       body: formData,
     });
@@ -35,7 +35,7 @@ async function handleSubmit() {
     console.log('リクエスト成功:', response);
     const data = await response.json();
     const threadId = data.id;
-    window.location.href = `http://imageboard.test.com/replies?id=${threadId}`;
+    window.location.href = `${process.env.domain}/replies?id=${threadId}`;
 
   } catch (error) {
     console.error('エラーが発生しました:', error);
@@ -47,8 +47,10 @@ const renderImage = (fileName) => {
   if (!fileName) {
     return null;
   }
-  const imageUrl = `http://imageboard.test.com/images/thumbnails/${fileName}`;
-  return <img src={imageUrl} alt="" style={{ maxWidth: '100%', height: 'auto' }} />;
+  const imageUrl = `${process.env.domain}/images/thumbnails/${fileName}`;
+  return (
+    <img src={imageUrl} alt="" style={{ maxWidth: '100%', height: 'auto' }} />
+  );
 };
 
 const displayNumOfReplies = (repliesArr) => {
@@ -68,7 +70,7 @@ function ThreadsDisplay() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch('http://imageboard.test.com/api/threads');
+      const response = await fetch(`${process.env.domain}/api/threads`);
       const data = await response.json();
       setThreads(data.threads);
       setIsLoading(false);

@@ -23,7 +23,7 @@ class ThreadsController implements ControllerInterface
     public function assignProcess(): JSONRenderer
     {
         if ($this->httpRequest->getMethod() == 'GET') {
-            return $this->getThreads();
+            return $this->getAllThreads();
         } elseif ($this->httpRequest->getMethod() == 'POST') {
             return $this->createThread();
         } else {
@@ -31,7 +31,7 @@ class ThreadsController implements ControllerInterface
         }
     }
 
-    private function getThreads(): JSONRenderer
+    private function getAllThreads(): JSONRenderer
     {
         ValidationHelper::validateGetThreadsRequest();
         $threadsWithReplies = $this->postService->getAllThreads();

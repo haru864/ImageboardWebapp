@@ -2,7 +2,7 @@
 
 import { validateSubject, validateContent, validateFile } from '../validation'
 import React, { useEffect, useState } from 'react';
-import { Box, Button, TextField, Typography, Card, CardContent, CardMedia } from '@mui/material';
+import { Box, Button, TextField, Typography, Card, CardContent, CircularProgress } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 async function handleSubmit() {
@@ -51,16 +51,39 @@ const renderImage = (fileName) => {
   return <img src={imageUrl} alt="" style={{ maxWidth: '100%', height: 'auto' }} />;
 };
 
+const displayNumOfReplies = (repliesArr) => {
+  const numOfRepies = repliesArr.length;
+  var message = null;
+  if (numOfRepies === 0) {
+    message = 'まだリプライがありません。';
+  } else {
+    message = `最新のリプライ${numOfRepies}件を以下に表示します。`;
+  }
+  return <Typography variant="body2" sx={{ marginTop: 2, marginLeft: 4 }}>{message}</Typography>;
+}
+
 function ThreadsDisplay() {
   const [threads, setThreads] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch('http://imageboard.test.com/api/threads');
       const data = await response.json();
       setThreads(data.threads);
+      setIsLoading(false);
     };
     fetchData();
   }, []);
+
+  if (isLoading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box
       component="main"
@@ -75,25 +98,28 @@ function ThreadsDisplay() {
     >
       <Box sx={{ margin: 2 }} label="thread-list">
         {threads.map((thread) => (
-          <Card key={thread.postId} sx={{ marginBottom: 2 }}>
-            <CardContent>
-              <Typography variant="h5" sx={{ marginBottom: 2 }}>{thread.subject}</Typography>
-              <Box display="flex" flexDirection="row" alignItems="center">
-                {renderImage(thread.imageFileName)}
-                <Typography variant="body1" sx={{ marginLeft: 2 }}>{thread.content}</Typography>
-              </Box>
-              {thread.replies.map((reply) => (
-                <Card key={reply.postId} sx={{ marginTop: 2, marginLeft: 4 }}>
-                  <CardContent>
-                    <Box display="flex" flexDirection="row" alignItems="center">
-                      {renderImage(reply.imageFileName)}
-                      <Typography variant="body2" sx={{ marginLeft: 2 }}>{reply.content}</Typography>
-                    </Box>
-                  </CardContent>
-                </Card>
-              ))}
-            </CardContent>
-          </Card>
+          <a href={`/replies?id=${thread.postId}`} key={thread.postId} style={{ textDecoration: 'none' }}>
+            <Card key={thread.postId} sx={{ marginBottom: 2 }}>
+              <CardContent>
+                <Typography variant="h5" sx={{ marginBottom: 2 }}>{thread.subject}</Typography>
+                <Box display="flex" flexDirection="row" alignItems="center">
+                  {renderImage(thread.imageFileName)}
+                  <Typography variant="body1" sx={{ marginLeft: 2 }}>{thread.content}</Typography>
+                </Box>
+                {displayNumOfReplies(thread.replies)}
+                {thread.replies.map((reply) => (
+                  <Card key={reply.postId} sx={{ marginTop: 2, marginLeft: 4 }}>
+                    <CardContent>
+                      <Box display="flex" flexDirection="row" alignItems="center">
+                        {renderImage(reply.imageFileName)}
+                        <Typography variant="body2" sx={{ marginLeft: 2 }}>{reply.content}</Typography>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
+              </CardContent>
+            </Card>
+          </a>
         ))}
       </Box>
       <Card
@@ -103,7 +129,8 @@ function ThreadsDisplay() {
           alignItems: 'center',
           justifyContent: 'flex-start',
           padding: '20px',
-          margin: 2
+          margin: 2,
+          marginTop: -2
         }}
         label="input"
       >

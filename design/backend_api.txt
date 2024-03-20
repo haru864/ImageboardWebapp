@@ -51,6 +51,16 @@ Content-Type: multipart/form-data
 <レスポンス>
 Content-Type: application/json
 {
+    "thread": {
+        "post_id": 123,
+        "reply_to_id": 123,
+        "subject": "XXXXX",
+        "content": "XXXXX",
+        "created_at": "XXXXX",
+        "updated_at": "XXXXX",
+        "image_file_name": "XXXXX",
+        "image_file_extension": "XXXXX"
+    },
     "replies": [
         {
             "post_id": 123,

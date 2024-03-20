@@ -39,10 +39,10 @@ class PostsService
         $threadPostId = $httpRequest->getQueryValue('id');
         $thread = $this->postDAO->getById($threadPostId);
         if (is_null($thread)) {
-            return ["replies" => []];
+            return ["thread" => null, "replies" => []];
         }
         $replies = $this->postDAO->getReplies($thread);
-        return ["replies" => $replies];
+        return ["thread" => $thread, "replies" => $replies];
     }
 
     public function registerThread(HttpRequest $httpRequest): int

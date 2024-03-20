@@ -34,8 +34,8 @@ class RepliesController implements ControllerInterface
     public function getReplies(): JSONRenderer
     {
         ValidationHelper::validateGetRepliesRequest();
-        $replies = $this->postService->getReplies($this->httpRequest);
-        return new JSONRenderer(200, $replies);
+        $threadAndReplies = $this->postService->getReplies($this->httpRequest);
+        return new JSONRenderer(200, $threadAndReplies);
     }
 
     public function createReply(): JSONRenderer

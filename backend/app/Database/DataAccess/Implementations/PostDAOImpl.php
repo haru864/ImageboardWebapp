@@ -121,10 +121,19 @@ class PostDAOImpl implements PostDAO
     {
         $mysqli = DatabaseManager::getMysqliConnection();
         if (is_null($offset) || is_null($limit)) {
-            $query = "SELECT * FROM post WHERE reply_to_id = ?";
+            $query = "SELECT * FROM post WHERE reply_to_id = ? ORDER BY updated_at ASC";
             $postRecords = $mysqli->prepareAndFetchAll($query, 'i', [$postData->getPostId()]);
         } else {
-            $query = "SELECT * FROM post WHERE reply_to_id = ? LIMIT ? OFFSET ?";
+            $query = <<<SQL
+                SELECT * FROM (
+                    SELECT * FROM post 
+                    WHERE reply_to_id = ? 
+                    ORDER BY updated_at DESC 
+                    LIMIT ?
+                    OFFSET ?
+                ) AS subquery
+                ORDER BY updated_at ASC
+            SQL;
             $postRecords = $mysqli->prepareAndFetchAll($query, 'iii', [$postData->getPostId(), $limit, $offset]);
         }
         return $this->convertRecordArrayToPostArray($postRecords);

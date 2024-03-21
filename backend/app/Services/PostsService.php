@@ -9,7 +9,6 @@ use Exceptions\InvalidMimeTypeException;
 use Exceptions\InvalidRequestParameterException;
 use Http\HttpRequest;
 use Settings\Settings;
-use Validate\ValidationHelper;
 
 class PostsService
 {
@@ -48,12 +47,6 @@ class PostsService
 
     public function registerThread(HttpRequest $httpRequest): int
     {
-        $subject = $httpRequest->getTextParam('subject');
-        $content = $httpRequest->getTextParam('content');
-        ValidationHelper::validateText(text: $subject, maxNumOfChars: 50);
-        ValidationHelper::validateText(text: $content, maxNumOfChars: 300);
-        ValidationHelper::validateImage();
-
         $currentDateTime = date('Y-m-d H:i:s');
         $uploadFileName = basename($_FILES["image"]["name"]);
         $stringToHash = $currentDateTime . $uploadFileName;
@@ -62,8 +55,8 @@ class PostsService
 
         $postId = $this->registerPost(
             replyToId: null,
-            subject: $subject,
-            content: $content,
+            subject: $httpRequest->getTextParam('subject'),
+            content: $httpRequest->getTextParam('content'),
             createdAt: $currentDateTime,
             updatedAt: $currentDateTime,
             imageFileName: $hashedFileName,
@@ -75,10 +68,6 @@ class PostsService
     public function registerReply(HttpRequest $httpRequest): int
     {
         $threadPostId = $httpRequest->getTextParam('id');
-        $content = $httpRequest->getTextParam('content');
-        ValidationHelper::validateText(text: $content, maxNumOfChars: 300);
-        ValidationHelper::validateImage();
-
         $currentDateTime = date('Y-m-d H:i:s');
         $uploadFileName = basename($_FILES["image"]["name"]);
         $stringToHash = $currentDateTime . $uploadFileName;
@@ -88,7 +77,7 @@ class PostsService
         $postId = $this->registerPost(
             replyToId: $threadPostId,
             subject: null,
-            content: $content,
+            content: $httpRequest->getTextParam('content'),
             createdAt: $currentDateTime,
             updatedAt: $currentDateTime,
             imageFileName: $hashedFileName,

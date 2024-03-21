@@ -13,6 +13,9 @@ use Exceptions\InvalidContentTypeException;
 
 class ValidationHelper
 {
+    private static int $MAX_SUBJECT_CHARS = 50;
+    private static int $MAX_CONTENT_CHARS = 300;
+
     public static function validateGetThreadsRequest(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -30,13 +33,16 @@ class ValidationHelper
         }
         $nonNullableTextParams = ['subject', 'content'];
         foreach ($nonNullableTextParams as $param) {
-            if (!isset($_POST[$param])) {
-                throw new InvalidRequestParameterException("{$param} must be set and is not nullable.");
+            if (!isset($_POST[$param]) || $_POST[$param] === '') {
+                throw new InvalidRequestParameterException("{$param} must be set and is not nullable and not empty.");
             }
         }
         if (!array_key_exists('image', $_FILES)) {
             throw new InvalidRequestParameterException("'image' must be set.");
         }
+        ValidationHelper::validateText(text: $_POST['subject'], maxNumOfChars: 50);
+        ValidationHelper::validateText(text: $_POST['content'], maxNumOfChars: 300);
+        ValidationHelper::validateImage();
     }
 
     public static function validateGetRepliesRequest(): void
@@ -54,37 +60,41 @@ class ValidationHelper
         if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') === false) {
             throw new InvalidContentTypeException("Content-Type must be 'multipart/form-data'");
         }
-        $nonNullableTextParams = ['content'];
+        $nonNullableTextParams = ['id', 'content'];
         foreach ($nonNullableTextParams as $param) {
-            if (!isset($_POST[$param])) {
-                throw new InvalidRequestParameterException("'{$param}' must be set and is not nullable.");
+            if (!isset($_POST[$param]) || $_POST[$param] === '') {
+                throw new InvalidRequestParameterException("'{$param}' must be set and is not nullable and not empty.");
             }
         }
         if (!array_key_exists('image', $_FILES)) {
             throw new InvalidRequestParameterException("'image' must be set.");
         }
+        ValidationHelper::validateText(text: $_POST['content'], maxNumOfChars: 300);
+        ValidationHelper::validateImage();
     }
 
-    public static function validateText(?string $text, ?int $maxNumOfChars = NULL, ?int $maxBytes = NULL): void
+    private static function validateText(?string $text, ?int $maxNumOfChars = NULL, ?int $maxBytes = NULL): void
     {
         if (!is_string($text)) {
-            throw new InvalidTextException('Given string is not text.');
+            throw new InvalidTextException("Given string is not text.");
         }
         if (isset($maxNumOfChars) && mb_strlen($text) > $maxNumOfChars) {
-            throw new InvalidTextException('Given string exceeds the maximum number of characters.');
+            $len = mb_strlen($text);
+            throw new InvalidTextException("Given string exceeds the maximum number of characters. ({$len} chars given)");
         }
         if (isset($maxBytes) && strlen($text) > $maxBytes) {
-            throw new InvalidTextException('Given string exceeds the maximum bytes.');
+            $bytes = strlen($text);
+            throw new InvalidTextException("Given string exceeds the maximum bytes. ({$bytes} bytes given)");
         }
     }
 
-    public static function validateImage(): void
+    private static function validateImage(): void
     {
         $ALLOWED_MIME_TYPE = ['image/jpeg', 'image/png', 'image/gif'];
         $REQUEST_PARAM_NAME = 'image';
 
         if ($_FILES[$REQUEST_PARAM_NAME]['error'] != UPLOAD_ERR_OK) {
-            throw new InternalServerException("Upload Error: error occured when uploading file.");
+            throw new InvalidRequestParameterException("Upload Error: error occured when uploading file.");
         }
 
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
@@ -115,7 +125,7 @@ class ValidationHelper
         }
     }
 
-    public static function validateInteger(mixed $value): void
+    private static function validateInteger(mixed $value): void
     {
         if (!is_int($value)) {
             throw new \Exception("Value '$value' is not integer.");

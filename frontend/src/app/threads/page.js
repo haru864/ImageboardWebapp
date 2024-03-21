@@ -29,7 +29,7 @@ async function handleSubmit() {
     });
     if (!response.ok) {
       console.error('リクエスト失敗:', response);
-      return;
+      throw new Error('サーバーとの接続でエラーが発生しました。');
     }
 
     console.log('リクエスト成功:', response);

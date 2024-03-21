@@ -6,6 +6,6 @@ trait GenericUserVisibleException
 {
     public function displayErrorMessage(): string
     {
-        return "<div>" . $this->getMessage() . "<div>";
+        return $this->getMessage();
     }
 }

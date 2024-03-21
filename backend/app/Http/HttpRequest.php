@@ -50,7 +50,7 @@ class HttpRequest
         return $this->uriDirectory;
     }
 
-    public function getTextParam(string $paramName): string
+    public function getTextParam(string $paramName): ?string
     {
         return $this->textParamArray[$paramName];
     }
@@ -60,7 +60,7 @@ class HttpRequest
         return $this->fileParamArray;
     }
 
-    public function getQueryValue(string $key): string
+    public function getQueryValue(string $key): ?string
     {
         return $this->queryStringArray[$key];
     }

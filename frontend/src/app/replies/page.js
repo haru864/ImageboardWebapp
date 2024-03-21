@@ -7,14 +7,32 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Link from 'next/link';
 
 async function handleSubmit(threadId) {
+
+    const content = document.getElementById('content').value;
+    const fileInput = document.querySelector('input[type="file"]');
+    const file = fileInput.files[0];
+
+    let contentError = null;
+    let fileError = null;
     try {
-        const content = document.getElementById('content').value;
-        const fileInput = document.querySelector('input[type="file"]');
-        const file = fileInput.files[0];
-
         validateContent(content);
+    } catch (error) {
+        console.error('Content validation failed:', error);
+        contentError = error;
+    }
+    try {
         validateFile(file);
+    } catch (error) {
+        console.error('File validation failed:', error);
+        fileError = error;
+    }
+    if (contentError && fileError) {
+        console.error('Both content and file validation failed');
+        alert(`本文または画像ファイルの選択が必要です。`);
+        return;
+    }
 
+    try {
         const formData = new FormData();
         formData.append('id', threadId);
         formData.append('content', content);

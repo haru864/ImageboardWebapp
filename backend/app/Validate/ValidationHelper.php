@@ -5,7 +5,6 @@ namespace Validate;
 use Settings\Settings;
 use Exceptions\FileSizeLimitExceededException;
 use Exceptions\InvalidTextException;
-use Exceptions\InternalServerException;
 use Exceptions\InvalidMimeTypeException;
 use Exceptions\InvalidRequestMethodException;
 use Exceptions\InvalidRequestParameterException;
@@ -13,8 +12,29 @@ use Exceptions\InvalidContentTypeException;
 
 class ValidationHelper
 {
-    private static int $MAX_SUBJECT_CHARS = 50;
-    private static int $MAX_CONTENT_CHARS = 300;
+    public static function isSubjectSet(): bool
+    {
+        return isset($_POST['subject']) && $_POST['subject'] !== '';
+    }
+
+    public static function isContentUploaded(): bool
+    {
+        return isset($_POST['content']) && $_POST['content'] !== '';
+    }
+
+    public static function isImageUploaded(): bool
+    {
+        return isset($_FILES['image']) && ($_FILES['image']['error'] == UPLOAD_ERR_OK);
+    }
+
+    // レコード削除バッチで存続期間を読み込む際の検証に使用する
+    public static function validateInteger(mixed $value): void
+    {
+        if (!is_int($value)) {
+            throw new \Exception("Value '$value' is not integer.");
+        }
+        return;
+    }
 
     public static function validateGetThreadsRequest(): void
     {
@@ -37,11 +57,11 @@ class ValidationHelper
                 throw new InvalidRequestParameterException("{$param} must be set and is not nullable and not empty.");
             }
         }
-        if (!array_key_exists('image', $_FILES)) {
+        if (!ValidationHelper::isImageUploaded()) {
             throw new InvalidRequestParameterException("'image' must be set.");
         }
-        ValidationHelper::validateText(text: $_POST['subject'], maxNumOfChars: 50);
-        ValidationHelper::validateText(text: $_POST['content'], maxNumOfChars: 300);
+        ValidationHelper::validateSubject($_POST['subject']);
+        ValidationHelper::validateContent($_POST['content']);
         ValidationHelper::validateImage();
     }
 
@@ -60,31 +80,41 @@ class ValidationHelper
         if (strpos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') === false) {
             throw new InvalidContentTypeException("Content-Type must be 'multipart/form-data'");
         }
-        $nonNullableTextParams = ['id', 'content'];
-        foreach ($nonNullableTextParams as $param) {
-            if (!isset($_POST[$param]) || $_POST[$param] === '') {
-                throw new InvalidRequestParameterException("'{$param}' must be set and is not nullable and not empty.");
-            }
+        if (!isset($_POST['id']) || $_POST['id'] === '') {
+            throw new InvalidRequestParameterException("'id' must be set and is not nullable and not empty.");
         }
-        if (!array_key_exists('image', $_FILES)) {
-            throw new InvalidRequestParameterException("'image' must be set.");
+        $isContentUploaded = ValidationHelper::isContentUploaded();
+        $isImageUploaded = ValidationHelper::isImageUploaded();
+        if (!$isContentUploaded && !$isImageUploaded) {
+            throw new InvalidRequestParameterException("'content' or 'image' must be set in request.");
         }
-        ValidationHelper::validateText(text: $_POST['content'], maxNumOfChars: 300);
-        ValidationHelper::validateImage();
+        if ($isContentUploaded) {
+            ValidationHelper::validateContent($_POST['content']);
+        }
+        if ($isImageUploaded) {
+            ValidationHelper::validateImage();
+        }
     }
 
-    private static function validateText(?string $text, ?int $maxNumOfChars = NULL, ?int $maxBytes = NULL): void
+    private static function validateSubject(?string $subject): void
     {
-        if (!is_string($text)) {
-            throw new InvalidTextException("Given string is not text.");
+        if (!is_string($subject)) {
+            throw new InvalidTextException("'subject' muse be string.");
         }
-        if (isset($maxNumOfChars) && mb_strlen($text) > $maxNumOfChars) {
-            $len = mb_strlen($text);
-            throw new InvalidTextException("Given string exceeds the maximum number of characters. ({$len} chars given)");
+        $len = mb_strlen($subject);
+        if ($len < 1  || $len > 50) {
+            throw new InvalidTextException("'subject' must be at least 1 and no more than 50 characters. ({$len} chars given)");
         }
-        if (isset($maxBytes) && strlen($text) > $maxBytes) {
-            $bytes = strlen($text);
-            throw new InvalidTextException("Given string exceeds the maximum bytes. ({$bytes} bytes given)");
+    }
+
+    private static function validateContent(?string $content): void
+    {
+        if (!is_string($content)) {
+            throw new InvalidTextException("'content' muse be string.");
+        }
+        $len = mb_strlen($content);
+        if ($len < 1  || $len > 300) {
+            throw new InvalidTextException("'content' must be at least 1 and no more than 300 characters. ({$len} chars given)");
         }
     }
 
@@ -123,13 +153,5 @@ class ValidationHelper
         ) {
             throw new InvalidMimeTypeException('The uploaded image is not in an approved format.');
         }
-    }
-
-    private static function validateInteger(mixed $value): void
-    {
-        if (!is_int($value)) {
-            throw new \Exception("Value '$value' is not integer.");
-        }
-        return;
     }
 }

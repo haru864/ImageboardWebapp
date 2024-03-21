@@ -15,9 +15,6 @@ class PostDAOImpl implements PostDAO
         if ($post->getPostId() !== null) {
             throw new InvalidDataException('Cannot create a post with id.');
         }
-        if ($post->getContent() === null) {
-            throw new InvalidDataException('Cannot create a post with null.');
-        }
         $mysqli = DatabaseManager::getMysqliConnection();
         $query = <<<SQL
             INSERT INTO post (

@@ -55,8 +55,10 @@ try {
         $thumbnailDirPath = Settings::env('THUMBNAIL_FILE_LOCATION');
         $uploadImageDirPath = Settings::env('UPLOADED_IMAGE_FILE_LOCATION');
         $imageFileName = $deleteTargetPost->getImageFileName();
-        deleteFile($thumbnailDirPath . '/' . $imageFileName);
-        deleteFile($uploadImageDirPath . '/' . $imageFileName);
+        if (isset($imageFileName)) {
+            deleteFile($thumbnailDirPath . '/' . $imageFileName);
+            deleteFile($uploadImageDirPath . '/' . $imageFileName);
+        }
         $postDAO->delete($id);
         $logger->logInfo("バッチ処理中: スレッド削除を完了 id'{$id}'");
     }

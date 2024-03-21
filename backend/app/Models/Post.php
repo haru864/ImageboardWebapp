@@ -12,7 +12,7 @@ class Post implements Model
     public ?int $postId;
     public ?int $replyToId;
     public ?string $subject;
-    public string $content;
+    public ?string $content;
     public string $createdAt;
     public string $updatedAt;
     public ?string $imageFileName;
@@ -22,7 +22,7 @@ class Post implements Model
         ?int $postId,
         ?int $replyToId = null,
         ?string $subject = null,
-        string $content,
+        ?string $content,
         string $createdAt,
         string $updatedAt,
         ?string $imageFileName,
@@ -68,7 +68,7 @@ class Post implements Model
         $this->subject = $subject;
     }
 
-    public function getContent(): string
+    public function getContent(): ?string
     {
         return $this->content;
     }

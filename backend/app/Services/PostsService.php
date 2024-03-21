@@ -9,6 +9,7 @@ use Exceptions\InvalidMimeTypeException;
 use Exceptions\InvalidRequestParameterException;
 use Http\HttpRequest;
 use Settings\Settings;
+use Validate\ValidationHelper;
 
 class PostsService
 {
@@ -69,10 +70,23 @@ class PostsService
     {
         $threadPostId = $httpRequest->getTextParam('id');
         $currentDateTime = date('Y-m-d H:i:s');
-        $uploadFileName = basename($_FILES["image"]["name"]);
-        $stringToHash = $currentDateTime . $uploadFileName;
-        $hashedFileName = $this->generateUniqueHashWithLimit($stringToHash);
-        $hashedFileName .= '.' . $this->getFileExtension();
+
+        // $isContentUploaded = ValidationHelper::isContentUploaded();
+        // if ($isContentUploaded) {
+        //     $content = $httpRequest->getTextParam('content');
+        // } else {
+
+        // }
+
+        $isImageUploaded = ValidationHelper::isImageUploaded();
+        if ($isImageUploaded) {
+            $uploadFileName = basename($_FILES["image"]["name"]);
+            $stringToHash = $currentDateTime . $uploadFileName;
+            $hashedFileName = $this->generateUniqueHashWithLimit($stringToHash);
+            $hashedFileName .= '.' . $this->getFileExtension();
+        } else {
+            $hashedFileName = null;
+        }
 
         $postId = $this->registerPost(
             replyToId: $threadPostId,
@@ -113,7 +127,9 @@ class PostsService
             imageFileExtension: $imageFileExtension
         );
         $postId = $this->postDAO->create($reply);
-        $this->preserveUploadedImageFile($imageFileName);
+        if (isset($imageFileName)) {
+            $this->preserveUploadedImageFile($imageFileName);
+        }
         return $postId;
     }
 
